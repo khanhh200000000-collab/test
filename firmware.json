@@ -1,0 +1,32 @@
+[
+  {
+    "name": "BeeChat",
+    "board": "ESP32",
+    "version": "1.0.0",
+    "date": "2026-09-23",
+    "size": "1.8 MB",
+    "description": "Firmware ESP32 thường - BeeChat",
+    "file": "beechat.bin",
+    "author": "esp32"
+  },
+  {
+    "name": "Bee443",
+    "board": "ESP32",
+    "version": "1.0.0",
+    "date": "2026-09-23",
+    "size": "1.9 MB",
+    "description": "Firmware ESP32 thường - Bee443",
+    "file": "bee443.bin",
+    "author": "esp32"
+  },
+  {
+    "name": "BW16",
+    "board": "ESP32",
+    "version": "1.0.0",
+    "date": "2026-09-23",
+    "size": "1.7 MB",
+    "description": "Firmware ESP32 thường - BW16",
+    "file": "bw16.bin",
+    "author": "esp32"
+  }
+]
