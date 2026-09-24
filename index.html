@@ -2942,14 +2942,14 @@
 
     <div class="vip-hero">
       <div>
-        <span class="vip-badge">★ ESP32 STANDARD FIRMWARE · BEECHAT / BEE443 / BW16</span>
-        <h2>ESP32 Firmware Hub — BEERUSS DIY Edition</h2>
-        <p>Firmware ESP32 thường với 3 bản chính: beechat.bin, bee443.bin và bw16.bin. Nạp trực tiếp qua USB bằng trình duyệt.</p>
+        <span class="vip-badge">★ BEECHAT ZERO ESP32 · BEERUSS DIY EDITION</span>
+        <h2>ESP32 Firmware Hub — BeeChat Zero ESP32</h2>
+        <p>Board BeeChat Zero ESP32, nạp trực tiếp firmware beechat.bin qua USB bằng trình duyệt. Khối nạp firmware đã được giữ rõ ràng để bạn có thể flash ngay.</p>
       </div>
     </div>
 
     <div class="vip-spec-strip">
-      <div class="spec"><b>ESP32</b><span>Standard Board</span></div>
+      <div class="spec"><b>BeeChat Zero</b><span>ESP32 Board</span></div>
       <div class="spec"><b>v1.0.0</b><span>Build 23/09/2026</span></div>
       <div class="spec"><b>1.8 MB</b><span>Dung lượng ROM</span></div>
       <div class="spec"><b>USB</b><span>Flash trực tiếp</span></div>
@@ -2984,12 +2984,13 @@
       <div class="vip-main-top">
         <div class="vip-chip-label">
           <span class="mf-led on"></span>
-          <span>beechat.bin · ESP32 Standard</span>
+          <span>beechat.bin · BeeChat Zero ESP32</span>
         </div>
         <div id="vip-page-license-tag" class="vip-mac-status-tag waiting">Sẵn sàng nạp</div>
       </div>
       <div class="vip-action-btns" id="vip-flash-slot">
-        <button id="vip-open-serial-mac" class="btn btn-flash" type="button">Lấy MAC</button>
+        <button id="vip-real-flash-btn" class="btn btn-flash" type="button">⚡ Nạp beechat.bin</button>
+        <button id="vip-open-serial-mac" class="btn btn-secondary" type="button">Lấy MAC</button>
       </div>
     </div>
 
@@ -4501,7 +4502,7 @@ document.addEventListener('mouseout', e => {
 (function tvBGoneTab(){
   let TVBGONE_FILE = 'beechat.bin';
   let TVBGONE_OFFSET = 0x0;
-  let TVBGONE_BOARD = 'ESP32';
+  let TVBGONE_BOARD = 'BeeChat Zero ESP32';
 
   const compat = document.getElementById('vip-flash-compat');
   const slot = document.getElementById('vip-flash-slot');
@@ -4689,15 +4690,19 @@ document.addEventListener('mouseout', e => {
     rawConsole.scrollTop = rawConsole.scrollHeight;
   }
 
-  // ====== TẠO NÚT FLASH ======
-  const vipFlashBtn = document.createElement('button');
-  vipFlashBtn.className = 'btn btn-flash';
-  vipFlashBtn.type = 'button';
-  vipFlashBtn.innerHTML = '⚡ Nạp beechat.bin';
-  vipFlashBtn.id = 'vip-real-flash-btn';
+  // ====== NÚT FLASH ======
+  const vipFlashBtn = document.getElementById('vip-real-flash-btn') || (() => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-flash';
+    btn.type = 'button';
+    btn.id = 'vip-real-flash-btn';
+    btn.textContent = '⚡ Nạp beechat.bin';
+    btn.title = 'Nạp firmware beechat.bin qua USB';
+    slot.prepend(btn);
+    return btn;
+  })();
   vipFlashBtn.style.display = '';
   vipFlashBtn.title = 'Nạp firmware beechat.bin qua USB';
-  slot.prepend(vipFlashBtn);
 
   let vipSerialPort = null;
   let vipSerialReader = null;
