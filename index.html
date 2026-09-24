@@ -5068,62 +5068,24 @@ document.addEventListener('mouseout', e => {
         rawLog('[WARN] hard_reset qua esptool thất bại: ' + (e?.message || e));
       }
 
-      setFlashState('done', '✓ Nạp firmware thành công! Đang tự reset & kết nối lại...');
+      setFlashState('done', '✓ Nạp firmware thành công!');
       setProgress(100);
-      smartLog('ok', 'FLASH XONG', '🎉 Flash thành công! Đang tự reset cứng và kết nối lại Serial...');
+      smartLog('ok', 'FLASH XONG', '🎉 Flash thành công! Không mở bảng kích hoạt key nữa — chỉ giữ luồng flash qua USB.');
       if(typeof toast === 'function') toast('🎉 Flash TV B Gone VIP thành công!');
       CyberAudio.successChime();
 
-      const flashedPort = currentPort;
       try{ if(transport) await transport.disconnect(); }catch(e){}
       esploader = null; transport = null; currentPort = null;
 
-      setTimeout(async () => {
+      setTimeout(() => {
         closeFlashModal();
-        if(typeof window.openActivateModal === 'function') window.openActivateModal();
 
-        try{
-          await new Promise(r => setTimeout(r, 1200));
+        const nextHint = '📟 Sau khi flash xong, mở tab WEB FLASHER — NÂNG CAO và xem CONSOLE_OUTPUT để copy MAC từ log serial.';
+        smartLog('sys', 'HƯỚNG DẪN', nextHint);
+        rawLog('[INFO] ' + nextHint);
 
-          let p = flashedPort;
-          if(!p){
-            const ports = await navigator.serial.getPorts();
-            if(ports && ports.length > 0) p = ports[ports.length - 1];
-          }
-          if(!p){
-            smartLog('sys', 'HƯỚNG DẪN', 'Không tìm thấy cổng COM — bấm "🔌 Kết nối Serial" để đọc mã MAC.');
-            return;
-          }
-
-          smartLog('sys', 'RESET CỨNG', '🔁 Đang toggle DTR/RTS để ép chip thoát bootloader...');
-          await p.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none' });
-
-          try{ await p.setSignals({ dataTerminalReady: false, requestToSend: true }); }catch(e){}
-          await new Promise(r => setTimeout(r, 150));
-          try{ await p.setSignals({ dataTerminalReady: false, requestToSend: false }); }catch(e){}
-          await new Promise(r => setTimeout(r, 100));
-
-          await new Promise(r => setTimeout(r, 250));
-          try{ await p.close(); }catch(e){}
-
-          smartLog('ok', 'RESET CỨNG', '✓ Đã reset cứng — chip đang boot firmware...');
-
-          if(typeof window.openSpecificPortVip === 'function'){
-            await new Promise(r => setTimeout(r, 600));
-            smartLog('sys', 'TỰ KẾT NỐI', '🔌 Đang tự động mở Serial Monitor kết nối vào ESP...');
-            window.__vipJustFlashed = true;
-            await window.openSpecificPortVip(p);
-            smartLog('ok', 'TỰ KẾT NỐI', '✓ Đã kết nối Serial — đang chờ firmware in MAC...');
-          }else{
-            smartLog('sys', 'HƯỚNG DẪN', 'Bấm nút "🔌 Kết nối Serial" để đọc mã MAC thiết bị.');
-          }
-        }catch(err){
-          const msg = err?.message || String(err);
-          rawLog('[WARN] auto-connect: ' + msg);
-          smartLog('warn', 'TỰ KẾT NỐI', '⚠️ Không tự kết nối được (' + msg + '). Bấm "🔌 Kết nối Serial" để thử lại.');
-          if(typeof toast === 'function') toast('⚠️ Không tự kết nối — bấm Kết nối Serial');
-        }
-      }, 1500);
+        if(typeof toast === 'function') toast('✓ Flash xong — xem CONSOLE_OUTPUT để copy MAC');
+      }, 1200);
 
     }catch(err){
       const errMsg = (err && err.message) ? err.message : String(err);
@@ -5255,16 +5217,8 @@ document.addEventListener('mouseout', e => {
     setLicenseState('unknown');
   }
 
-  function normalizeMacString(raw){
-    if(!raw) return null;
-    const cleaned = String(raw).replace(/^0x/i, '').replace(/[-:]/g, '').replace(/\s+/g, '').replace(/[^0-9A-F]/gi, '');
-    if(!/^[0-9A-F]{12}$/i.test(cleaned)) return null;
-    return cleaned.match(/.{2}/g).join(':').toUpperCase();
-  }
-
   function setDetectedMac(macStr){
-    const normalized = normalizeMacString(macStr);
-    detectedMac = normalized || String(macStr).trim().toUpperCase();
+    detectedMac = macStr.toUpperCase();
     macValueEl.textContent = detectedMac;
     macValueEl.classList.remove('pending');
     macStatusTag.className = 'vip-mac-status-tag detected';
@@ -5281,20 +5235,17 @@ document.addEventListener('mouseout', e => {
   }
 
   function extractMacFromLine(line){
-    const patterns = [
-      /(?:^|[^A-Fa-f0-9])MAC\s*[:=]\s*(?:0x)?([0-9A-Fa-f]{2}(?:[:-]?[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{12})(?:\b|$)/i,
-      /(?:^|[^A-Fa-f0-9])(?:WIFI|WLAN|ETH|MAC)\s*[:=]?\s*(?:0x)?([0-9A-Fa-f]{2}(?:[:-]?[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{12})(?:\b|$)/i,
-      /\b([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})\b/,
-      /\b(?:0x)?([0-9A-Fa-f]{12})\b/i
-    ];
+    let m = line.match(/MAC\s*[:=]\s*(?:0x)?([0-9A-Fa-f]{6,16})/i);
+    if(m) return '0x' + m[1].replace(/^0x/i, '').toUpperCase();
 
-    for(const pattern of patterns){
-      const match = line.match(pattern);
-      if(match){
-        const normalized = normalizeMacString(match[1]);
-        if(normalized) return normalized;
-      }
-    }
+    m = line.match(/\[?MAC\]?\s*[:=]?\s*(?:0x)?([0-9A-Fa-f]{6,16})\b/i);
+    if(m) return '0x' + m[1].replace(/^0x/i, '').toUpperCase();
+
+    m = line.match(/\b(?:0x)?([0-9A-Fa-f]{8})\b/);
+    if(m && /mac|chip|efuse|id/i.test(line)) return '0x' + m[1].toUpperCase();
+
+    m = line.match(/\b([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})\b/);
+    if(m) return m[1].replace(/-/g, ':').toUpperCase();
 
     return null;
   }
@@ -5316,14 +5267,12 @@ document.addEventListener('mouseout', e => {
     }
 
     const foundMac = extractMacFromLine(line);
-    if(foundMac){
+    if(foundMac && !detectedMac){
       if(window.__vipMacTimeout){
         clearTimeout(window.__vipMacTimeout);
         window.__vipMacTimeout = null;
       }
-      if(detectedMac !== foundMac){
-        setDetectedMac(foundMac);
-      }
+      setDetectedMac(foundMac);
       smartLog('mac', 'MÃ MAC HIỆN TẠI', `✅ Đã truy xuất thành công: ${foundMac}`);
       smartLog('sys', 'THÔNG BÁO', `→ MAC hiện tại của chip là: ${foundMac} — Sẵn sàng nhận key kích hoạt.`);
       if(typeof toast === 'function') toast('✓ Đã đọc MAC: ' + foundMac);
@@ -5403,7 +5352,11 @@ document.addEventListener('mouseout', e => {
   window.openActivateModal = openActivateModal;
   window.closeActivateModal = closeActivateModal;
 
-  openActivateBtn?.addEventListener('click', openActivateModal);
+  openActivateBtn && (openActivateBtn.disabled = true, openActivateBtn.title = 'Tắt tính năng lấy MAC/key trong luồng flash USB – dùng Web Flasher console để copy MAC');
+  openActivateBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
+    if(typeof toast === 'function') toast('⚠️ Chế độ flash USB chỉ giữ lại dữ liệu flash — MAC phải đọc từ CONSOLE_OUTPUT của Web Flasher — NÂNG CAO');
+  });
   closeBtn?.addEventListener('click', async () => { await closePort(); closeActivateModal(); });
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape' && overlay.classList.contains('show')) closeActivateModal();
@@ -5438,13 +5391,8 @@ document.addEventListener('mouseout', e => {
     led.classList.remove('on');
     statusText.textContent = 'CHƯA KẾT NỐI';
     sendBtn.disabled = true;
-    if(window.__vipMacTimeout){
-      clearTimeout(window.__vipMacTimeout);
-      window.__vipMacTimeout = null;
-    }
-    resetMacDisplay();
+    setLicenseState('unknown');
   }
-  resetMacDisplay();
   disconnectedUI();
   if(!canFlashInBrowser){
     connectBtn.disabled = true;
@@ -5483,7 +5431,6 @@ document.addEventListener('mouseout', e => {
     try{ if(reader) await reader.cancel(); }catch(e){}
     try{ if(port) await port.close(); }catch(e){}
     reader = null; port = null; buffer = '';
-    resetMacDisplay();
     disconnectedUI();
   }
 
@@ -5498,40 +5445,6 @@ document.addEventListener('mouseout', e => {
     }finally{
       try{ if(writer) writer.releaseLock(); }catch(e){}
     }
-  }
-
-  function queueAutoMacCheck(){
-    if(window.__vipMacTimeout) clearTimeout(window.__vipMacTimeout);
-    if(window.__vipMacRetryHandle) clearInterval(window.__vipMacRetryHandle);
-    window.__vipMacRetryHandle = null;
-
-    const attempts = [200, 600, 1200, 2200, 4000];
-    let step = 0;
-
-    const tick = async () => {
-      if(!port || !port.writable) return;
-      if(!detectedMac){
-        rawLog('> mac');
-        await writeSerial('mac\r\n');
-      }
-      if(step < attempts.length - 1){
-        step += 1;
-        window.__vipMacRetryHandle = setTimeout(tick, attempts[step]);
-      } else if(!detectedMac){
-        macValueEl.textContent = '⚠️ Không nhận được MAC';
-        macStatusTag.className = 'vip-mac-status-tag waiting';
-        macStatusTag.textContent = 'TIMEOUT';
-        smartLog('err', 'TRUY XUẤT MAC', '❌ Hết thời gian chờ nhiều lần. Bấm "🔄 Đọc lại MAC" để thử lại.');
-        if(typeof toast === 'function') toast('⚠️ Không đọc được MAC — bấm Đọc lại');
-      }
-    };
-
-    window.__vipMacTimeout = setTimeout(() => {
-      if(!detectedMac){
-        tick();
-      }
-    }, attempts[0]);
-    window.__vipMacRetryHandle = setTimeout(tick, attempts[1]);
   }
 
   async function openSpecificPort(p){
@@ -5550,13 +5463,27 @@ document.addEventListener('mouseout', e => {
         smartLog('cmd', 'REBOOT', '⟲ Gửi lệnh "reboot" để chip khởi động lại sạch...');
         rawLog('> reboot');
         await writeSerial('reboot\r\n');
-        await new Promise(r => setTimeout(r, 600));
+        await new Promise(r => setTimeout(r, 2000));
       }else{
         smartLog('sys', 'BỎ QUA REBOOT', '✓ Vừa reset cứng xong — bỏ qua lệnh reboot để giữ log MAC.');
         window.__vipJustFlashed = false;
       }
 
-      queueAutoMacCheck();
+      if(!detectedMac){
+        rawLog('> mac');
+        await writeSerial('mac\r\n');
+
+        if(window.__vipMacTimeout) clearTimeout(window.__vipMacTimeout);
+        window.__vipMacTimeout = setTimeout(() => {
+          if(!detectedMac){
+            macValueEl.textContent = '⚠️ Không nhận được MAC';
+            macStatusTag.className = 'vip-mac-status-tag waiting';
+            macStatusTag.textContent = 'TIMEOUT';
+            smartLog('err', 'TRUY XUẤT MAC', '❌ Hết thời gian chờ (3s). Bấm "🔄 Đọc lại MAC".');
+            if(typeof toast === 'function') toast('⚠️ Không đọc được MAC — bấm Đọc lại');
+          }
+        }, 3000);
+      }
     }catch(err){
       if(err?.name !== 'NotFoundError'){
         smartLog('err', 'LỖI KẾT NỐI', err?.message || err);
@@ -5600,7 +5527,6 @@ document.addEventListener('mouseout', e => {
     await writeSerial('mac\r\n');
 
     if(window.__vipMacTimeout) clearTimeout(window.__vipMacTimeout);
-    if(window.__vipMacRetryHandle) clearTimeout(window.__vipMacRetryHandle);
     window.__vipMacTimeout = setTimeout(() => {
       if(!detectedMac){
         macValueEl.textContent = '⚠️ Không nhận được MAC';
