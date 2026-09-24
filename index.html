@@ -3020,7 +3020,7 @@
         <div id="vip-page-license-tag" class="vip-mac-status-tag waiting">Sẵn sàng nạp</div>
       </div>
       <div class="vip-action-btns" id="vip-flash-slot">
-        <button id="vip-open-serial-mac" class="btn btn-flash" type="button">�️ Lấy MAC</button>
+        <button id="vip-open-serial-mac" class="btn btn-flash" type="button">Lấy MAC</button>
       </div>
     </div>
 
@@ -5299,10 +5299,9 @@ document.addEventListener('mouseout', e => {
 
       setTimeout(async () => {
         closeFlashModal();
-        if(typeof window.openActivateModal === 'function') window.openActivateModal();
 
         try{
-          await new Promise(r => setTimeout(r, 1200));
+          await new Promise(r => setTimeout(r, 500));
 
           let p = flashedPort;
           if(!p){
@@ -5492,6 +5491,13 @@ document.addEventListener('mouseout', e => {
       macValueEl.style.transition = 'text-shadow .8s ease';
       macValueEl.style.textShadow = '0 0 16px rgba(212,175,55,.3)';
     }, 400);
+
+    if(typeof window.openActivateModal === 'function'){
+      setTimeout(async () => {
+        try{ await closePort(); }catch(e){}
+        window.openActivateModal();
+      }, 400);
+    }
   }
 
   function extractMacFromLine(line){
@@ -5602,10 +5608,18 @@ document.addEventListener('mouseout', e => {
   });
 
   function openActivateModal(){
+    if(licenseBadge) licenseBadge.style.display = 'none';
+    if(keyInput) keyInput.closest('.vip-key-section')?.style.setProperty('display', 'none');
+    if(pageLicenseTag) pageLicenseTag.style.display = 'none';
+
     overlay.classList.add('show');
     requestAnimationFrame(() => overlay.classList.add('visible'));
   }
   function closeActivateModal(){
+    if(licenseBadge) licenseBadge.style.display = '';
+    if(keyInput) keyInput.closest('.vip-key-section')?.style.setProperty('display', '');
+    if(pageLicenseTag) pageLicenseTag.style.display = '';
+
     overlay.classList.remove('visible');
     setTimeout(() => overlay.classList.remove('show'), 180);
   }
