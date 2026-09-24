@@ -5483,7 +5483,9 @@ document.addEventListener('mouseout', e => {
     macStatusTag.className = 'vip-mac-status-tag detected';
     macStatusTag.textContent = 'ĐÃ NHẬN DIỆN ✓';
     macCopyBtn.disabled = false;
+    macCopyBtn.style.display = '';
     macTiktokBtn.disabled = false;
+    macTiktokBtn.style.display = '';
 
     macValueEl.style.transition = 'none';
     macValueEl.style.textShadow = '0 0 30px rgba(212,175,55,.85)';
@@ -5496,7 +5498,7 @@ document.addEventListener('mouseout', e => {
       window.openActivateModal();
       setTimeout(async () => {
         try{ await closePort(); }catch(e){}
-      }, 250);
+      }, 700);
     }
   }
 
@@ -5608,12 +5610,17 @@ document.addEventListener('mouseout', e => {
   });
 
   function openActivateModal(){
-    if(licenseBadge) licenseBadge.style.display = 'none';
-    if(keyInput) keyInput.closest('.vip-key-section')?.style.setProperty('display', 'none');
-    if(pageLicenseTag) pageLicenseTag.style.display = 'none';
+    if(licenseBadge) licenseBadge.style.display = '';
+    if(keyInput) keyInput.closest('.vip-key-section')?.style.setProperty('display', '');
+    if(pageLicenseTag) pageLicenseTag.style.display = '';
 
     overlay.classList.add('show');
     requestAnimationFrame(() => overlay.classList.add('visible'));
+    if(macValueEl && macValueEl.textContent && macValueEl.textContent !== '— chưa phát hiện —' && macValueEl.textContent !== '— đang chờ dữ liệu —'){
+      macValueEl.style.display = 'block';
+      macCopyBtn.style.display = '';
+      macCopyBtn.disabled = false;
+    }
   }
   function closeActivateModal(){
     if(licenseBadge) licenseBadge.style.display = '';
@@ -5735,8 +5742,11 @@ document.addEventListener('mouseout', e => {
       if(port && typeof port.close === 'function'){
         await closePort();
       }
+      if(p && p.readable && p.writable && p.opened){
+        try{ await p.close(); }catch(e){}
+      }
       port = p;
-      if(port && !port.readable && !port.writable){
+      if(port && typeof port.open === 'function'){
         await port.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none' });
       }
       CyberAudio.connectPing();
