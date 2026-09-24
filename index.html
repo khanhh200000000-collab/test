@@ -5074,6 +5074,12 @@ document.addEventListener('mouseout', e => {
       if(typeof toast === 'function') toast('Không copy được — trình duyệt chặn clipboard');
     }
   });
+
+  // ====== LẮNG NGHE firmware.json LOAD XONG ĐỂ UPDATE CONFIG ======
+  window.addEventListener('firmware-loaded', (e) => {
+    const all = e.detail || [];
+    if(!Array.isArray(all) || !all.length) return;
+
     const tvbItem = all.find(it => 
       typeof it.name === 'string' && /tv\s*[-_.]?\s*b[\s-]?gone/i.test(it.name)
     );
