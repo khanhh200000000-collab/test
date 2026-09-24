@@ -8,29 +8,29 @@
 <meta property="og:title" content="BEERUSS DIY · Firmware Hub">
 <meta property="og:description" content="Firmware ESP32-S3 tự build — flash qua web bằng Chrome/Edge, hoặc tải về dùng esptool.">
 <meta property="og:type" content="website">
-<meta name="theme-color" content="#0a150f">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230f2317'/%3E%3Crect x='9' y='9' width='14' height='14' rx='1' fill='none' stroke='%233ddc84' stroke-width='2'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%233ddc84'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#1a0d16">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2319121d'/%3E%3Crect x='9' y='9' width='14' height='14' rx='1' fill='none' stroke='%23ff6bb7' stroke-width='2'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%2369f0ff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
 <style>
   :root{
-    --bg:#040906; --bg-2:#06110a;
-    --panel:#08160d; --panel-2:#0b1e12; --panel-3:#102b1a;
-    --mask:#133822; --trace:#3ddc84; --trace-bright:#5ff5a4; --trace-dim:#1b7342;
-    --gold:#d4af37; --gold-light:#ffe072; --gold-bright:#fff3a8; --gold-dim:#9a7b1c;
-    --cyan:#25f4ee; --cyan-glow:rgba(37,244,238,0.4);
-    --text:#ecf7f0; --text-dim:#9ebfb0; --muted:#5c826e;
-    --danger:#ff5252;
+    --bg:#120b14; --bg-2:#1c1220;
+    --panel:#1d1220; --panel-2:#271625; --panel-3:#301b2d;
+    --mask:#4a1d4f; --trace:#ff6bb7; --trace-bright:#ff9ad2; --trace-dim:#d6428c;
+    --gold:#f6c7dc; --gold-light:#ffe5f1; --gold-bright:#fff3fa; --gold-dim:#c88bb1;
+    --cyan:#69f0ff; --cyan-glow:rgba(105,240,255,0.42);
+    --text:#fff3fb; --text-dim:#efd4e5; --muted:#c38bb0;
+    --danger:#ff5f9a;
     --radius-sm:6px;
     --radius:8px;
     --radius-lg:12px;
     --radius-pill:9999px;
     
-    --glow-trace: rgba(61, 220, 132, 0.45);
-    --glow-gold: rgba(212, 175, 55, 0.45);
-    --glow-cyan: rgba(37, 244, 238, 0.45);
+    --glow-trace: rgba(255, 107, 183, 0.45);
+    --glow-gold: rgba(246, 199, 220, 0.45);
+    --glow-cyan: rgba(105, 240, 255, 0.45);
     --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   }
   
@@ -39,11 +39,11 @@
   body{
     margin:0;
     background:
-      radial-gradient(ellipse 1000px 700px at 15% -5%, rgba(61,220,132,.18) 0%, transparent 65%),
-      radial-gradient(ellipse 900px 600px at 85% 20%, rgba(37,244,238,.12) 0%, transparent 60%),
-      radial-gradient(ellipse 1100px 800px at 50% 85%, rgba(19,56,34,.35) 0%, transparent 75%),
-      radial-gradient(ellipse 800px 600px at 92% 95%, rgba(212,175,55,.12) 0%, transparent 65%),
-      linear-gradient(180deg, #091a10 0%, #06140c 40%, #040c07 100%);
+      radial-gradient(ellipse 1000px 700px at 15% -5%, rgba(255,107,183,.22) 0%, transparent 65%),
+      radial-gradient(ellipse 900px 600px at 85% 20%, rgba(105,240,255,.14) 0%, transparent 60%),
+      radial-gradient(ellipse 1100px 800px at 50% 85%, rgba(120,71,112,.32) 0%, transparent 75%),
+      radial-gradient(ellipse 800px 600px at 92% 95%, rgba(255,160,205,.10) 0%, transparent 65%),
+      linear-gradient(180deg, #180d18 0%, #120b14 38%, #09070b 100%);
     color:var(--text); font-family:'Inter',sans-serif;
     min-height:100vh; background-attachment:fixed;
     position:relative;
@@ -51,9 +51,9 @@
   body::before{
     content:""; position:fixed; inset:0;
     background-image:
-      radial-gradient(circle, rgba(61,220,132,.10) 1px, transparent 1px),
-      linear-gradient(rgba(61,220,132,.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(61,220,132,.035) 1px, transparent 1px);
+      radial-gradient(circle, rgba(255,107,183,.12) 1px, transparent 1px),
+      linear-gradient(rgba(105,240,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,107,183,.04) 1px, transparent 1px);
     background-size:28px 28px, 56px 56px, 56px 56px;
     pointer-events:none; z-index:0;
     mask-image:radial-gradient(ellipse at 50% 25%, black 40%, transparent 92%);
@@ -218,7 +218,9 @@
   .mf-addr-input{
     width:120px; flex:none; text-align:center; font-weight:700;
     border:1.5px solid rgba(61,220,132,.3); background:#040c06; border-radius:var(--radius);
+    color:var(--text);
   }
+
   .mf-remove-row{color:var(--danger); border-color:rgba(255,82,82,.4); border-radius:var(--radius);}
   .mf-remove-row:hover{border-color:var(--danger); background:rgba(255,82,82,.15); box-shadow:0 0 10px rgba(255,82,82,.3);}
 
