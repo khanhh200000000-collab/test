@@ -3027,6 +3027,7 @@
     <div class="mf-console-wrap">
       <div class="mf-console-head">
         <span class="label"><span class="dot"></span>CONSOLE_OUTPUT</span>
+        <button id="vip-mac-close" class="btn btn-ghost btn-icon" type="button" title="Ngắt kết nối & đóng đọc MAC">✕</button>
         <button id="vip-mac-copy" class="btn btn-ghost btn-icon" type="button" title="Copy MAC">📋</button>
       </div>
       <pre class="mf-console" id="vip-mac-console">Sẵn sàng. Bấm "Lấy MAC" để kết nối thiết bị và đọc mã MAC ở đây.</pre>
@@ -4737,6 +4738,7 @@ document.addEventListener('mouseout', e => {
   const serialMacBtn = document.getElementById('vip-open-serial-mac');
   const vipMacConsole = document.getElementById('vip-mac-console');
   const vipMacCopyBtn = document.getElementById('vip-mac-copy');
+  const vipMacCloseBtn = document.getElementById('vip-mac-close');
   if(!slot) return;
 
   // ====== UI FLASH PROGRESS VIP ======
@@ -4952,24 +4954,39 @@ document.addEventListener('mouseout', e => {
     vipMacConsole.scrollTop = vipMacConsole.scrollHeight;
   }
 
+  function formatMacToColon(raw){
+    const digits = String(raw || '').replace(/^0x/i, '').replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+    if(!digits) return '';
+
+    const compact = digits.length === 12 ? digits : digits.length === 16 ? digits.slice(-12) : digits;
+    if(compact.length !== 12) return '';
+
+    const parts = [];
+    for(let i = 0; i < compact.length; i += 2){
+      parts.push(compact.slice(i, i + 2));
+    }
+    return parts.join(':');
+  }
+
   function normalizeMacValue(mac){
-    const cleaned = String(mac || '').replace(/^0x/i, '').replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
-    if(cleaned.length === 12) return '0x' + cleaned;
-    if(cleaned.length === 6) return '0x' + cleaned;
-    return '0x' + cleaned;
+    const value = formatMacToColon(mac);
+    return value || '';
   }
 
   function extractVipMacCandidates(line){
     const results = [];
-    const matchMac = line.match(/MAC\s*[:=]\s*(?:0x)?([0-9A-Fa-f]{6,16})/i);
-    if(matchMac){
-      results.push(normalizeMacValue(matchMac[1]));
+    const text = String(line || '');
+    const directMac = text.match(/MAC\s*[:=]\s*([0-9A-Fa-f:.-]{8,})/i);
+    if(directMac){
+      const value = normalizeMacValue(directMac[1]);
+      if(value) results.push(value);
     }
 
-    const generalMatches = [...line.matchAll(/(?:0x)?([0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{12}|[0-9A-Fa-f]{6,16})/g)];
+    const generalMatches = [...text.matchAll(/(?:0x)?([0-9A-Fa-f]{12}|[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{2}(?:-[0-9A-Fa-f]{2}){5})/g)];
     for(const m of generalMatches){
       const value = normalizeMacValue(m[1]);
-      if(value && !results.includes(value) && /MAC|chip|esp|id|wifi/i.test(line.toLowerCase())){
+      if(!value) continue;
+      if(!results.includes(value) && /MAC|chip|esp|id|wifi|802|sta|ap/i.test(text.toLowerCase())){
         results.push(value);
       }
     }
@@ -5033,10 +5050,12 @@ document.addEventListener('mouseout', e => {
     vipSerialReader = null;
     vipSerialPort = null;
     vipSerialBuffer = '';
+    if(vipMacCopyBtn) vipMacCopyBtn.disabled = true;
   }
 
   async function connectVipSerialAndReadMac(){
     try{
+      if(vipSerialPort) await disconnectVipSerial();
       vipMacConsole.innerHTML = '';
       vipDetectedMacs = [];
       if(vipMacCopyBtn) vipMacCopyBtn.disabled = true;
@@ -5083,6 +5102,7 @@ document.addEventListener('mouseout', e => {
       addVipConsoleLine('Connecting...');
       await esploader.main();
       addVipConsoleLine('Đã kết nối và đọc xong thông tin chip.');
+      await disconnectVipSerial();
 
       if(vipDetectedMacs.length && vipMacCopyBtn) vipMacCopyBtn.disabled = false;
     }catch(err){
@@ -5090,6 +5110,12 @@ document.addEventListener('mouseout', e => {
       await disconnectVipSerial();
     }
   }
+
+  vipMacCloseBtn?.addEventListener('click', async () => {
+    vipMacConsole.textContent = 'Đã ngắt kết nối. Bấm "Lấy MAC" để đọc lại mã MAC.';
+    await disconnectVipSerial();
+    if(vipMacCopyBtn) vipMacCopyBtn.disabled = true;
+  });
 
   serialMacBtn?.addEventListener('click', connectVipSerialAndReadMac);
 
