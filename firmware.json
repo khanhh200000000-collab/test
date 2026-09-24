@@ -1,11 +1,11 @@
 [
   {
-    "name": "BeeChat",
+    "name": "BeeChat Zero",
     "board": "ESP32",
     "version": "1.0.0",
     "date": "2026-09-23",
     "size": "1.8 MB",
-    "description": "Firmware ESP32 thường - BeeChat",
+    "description": "Firmware ESP32 thường - BeeChat Zero · LoRa chính / Wi‑Fi 5G / IR / RF / BLE / NRF24 / NFC / GPS / chat app / game",
     "file": "beechat.bin",
     "author": "esp32"
   }
