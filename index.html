@@ -2682,7 +2682,7 @@
     <button class="nav-link active" data-view="info">Giới thiệu</button>
     <button class="nav-link" data-view="firmware">Firmware</button>
     <button class="nav-link" data-view="manual">Web Flasher</button>
-    <button class="nav-link nav-link-vip" data-view="tvbgone"><span class="nav-vip-dot"></span>TV B Gone</button>
+    <button class="nav-link nav-link-vip" data-view="tvbgone"><span class="nav-vip-dot"></span>ESP32 Firmware</button>
     <button class="nav-link" data-view="serial">Serial Monitor</button>
     <button id="sfx-toggle-btn" class="sfx-toggle-btn sfx-on" type="button" title="Âm thanh Cyber Synth (Bấm để bật/tắt)"><span class="sfx-icon">🔊</span> SFX: ON</button>
   </nav>
@@ -2973,17 +2973,17 @@
 
     <div class="vip-hero">
       <div>
-        <span class="vip-badge">★ VIP TV-B-GONE PRO · ESP32-C3 SUPER MINI</span>
-        <h2>TV B Gone — BEERUSS DIY Edition (v2.0)</h2>
-        <p>Firmware đa năng tích hợp TV-B-Gone tắt TV mọi hãng, Thu chép ir, NRF Jammer & IR Messenger.</p>
+        <span class="vip-badge">★ ESP32 STANDARD FIRMWARE · BEECHAT / BEE443 / BW16</span>
+        <h2>ESP32 Firmware Hub — BEERUSS DIY Edition</h2>
+        <p>Firmware ESP32 thường với 3 bản chính: beechat.bin, bee443.bin và bw16.bin. Nạp trực tiếp qua USB bằng trình duyệt.</p>
       </div>
     </div>
 
     <div class="vip-spec-strip">
-      <div class="spec"><b>ESP32-C3</b><span>Super Mini (RISC-V)</span></div>
-      <div class="spec"><b>v2.0.0</b><span>Build 16/09/2026</span></div>
-      <div class="spec"><b>710 KB</b><span>Dung lượng ROM</span></div>
-      <div class="spec"><b>NVS Auth</b><span>Lưu key vĩnh viễn</span></div>
+      <div class="spec"><b>ESP32</b><span>Standard Board</span></div>
+      <div class="spec"><b>v1.0.0</b><span>Build 23/09/2026</span></div>
+      <div class="spec"><b>1.8 MB</b><span>Dung lượng ROM</span></div>
+      <div class="spec"><b>USB</b><span>Flash trực tiếp</span></div>
     </div>
 
     <div class="vip-stepper">
@@ -3015,13 +3015,13 @@
       <div class="vip-main-top">
         <div class="vip-chip-label">
           <span class="mf-led on"></span>
-          <span>TvBGoneV2HungTesp.bin · ESP32-C3 Super Mini</span>
+          <span>beechat.bin · ESP32 Standard</span>
         </div>
         <div id="vip-page-license-tag" class="vip-mac-status-tag waiting">Sẵn sàng nạp</div>
       </div>
       <div class="vip-action-btns" id="vip-flash-slot">
-        <a class="btn btn-secondary" href="firmware/TvBGoneV2HungTesp.bin" download>Tải firmware (.bin)</a>
-        <button id="vip-open-activate" class="btn btn-flash" type="button">🔑 Mở Bảng Kích Hoạt VIP & Lấy MAC</button>
+        <a class="btn btn-secondary" href="firmware/beechat.bin" download>Tải firmware (.bin)</a>
+        <button id="vip-open-activate" class="btn btn-flash" type="button">⚡ Nạp nhanh bằng USB</button>
       </div>
     </div>
 
@@ -4721,9 +4721,9 @@ document.addEventListener('mouseout', e => {
 // TAB "TV B GONE" — flash VIP + kích hoạt key
 // =====================================================================
 (function tvBGoneTab(){
-  let TVBGONE_FILE = 'TvBGoneV2HungTesp.bin';
+  let TVBGONE_FILE = 'beechat.bin';
   let TVBGONE_OFFSET = 0x0;
-  let TVBGONE_BOARD = 'ESP32-C3';
+  let TVBGONE_BOARD = 'ESP32';
 
   const compat = document.getElementById('vip-flash-compat');
   const slot = document.getElementById('vip-flash-slot');
@@ -5068,24 +5068,62 @@ document.addEventListener('mouseout', e => {
         rawLog('[WARN] hard_reset qua esptool thất bại: ' + (e?.message || e));
       }
 
-      setFlashState('done', '✓ Nạp firmware thành công!');
+      setFlashState('done', '✓ Nạp firmware thành công! Đang tự reset & kết nối lại...');
       setProgress(100);
-      smartLog('ok', 'FLASH XONG', '🎉 Flash thành công! Không mở bảng kích hoạt key nữa — chỉ giữ luồng flash qua USB.');
+      smartLog('ok', 'FLASH XONG', '🎉 Flash thành công! Đang tự reset cứng và kết nối lại Serial...');
       if(typeof toast === 'function') toast('🎉 Flash TV B Gone VIP thành công!');
       CyberAudio.successChime();
 
+      const flashedPort = currentPort;
       try{ if(transport) await transport.disconnect(); }catch(e){}
       esploader = null; transport = null; currentPort = null;
 
-      setTimeout(() => {
+      setTimeout(async () => {
         closeFlashModal();
+        if(typeof window.openActivateModal === 'function') window.openActivateModal();
 
-        const nextHint = '📟 Sau khi flash xong, mở tab WEB FLASHER — NÂNG CAO và xem CONSOLE_OUTPUT để copy MAC từ log serial.';
-        smartLog('sys', 'HƯỚNG DẪN', nextHint);
-        rawLog('[INFO] ' + nextHint);
+        try{
+          await new Promise(r => setTimeout(r, 1200));
 
-        if(typeof toast === 'function') toast('✓ Flash xong — xem CONSOLE_OUTPUT để copy MAC');
-      }, 1200);
+          let p = flashedPort;
+          if(!p){
+            const ports = await navigator.serial.getPorts();
+            if(ports && ports.length > 0) p = ports[ports.length - 1];
+          }
+          if(!p){
+            smartLog('sys', 'HƯỚNG DẪN', 'Không tìm thấy cổng COM — bấm "🔌 Kết nối Serial" để đọc mã MAC.');
+            return;
+          }
+
+          smartLog('sys', 'RESET CỨNG', '🔁 Đang toggle DTR/RTS để ép chip thoát bootloader...');
+          await p.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none' });
+
+          try{ await p.setSignals({ dataTerminalReady: false, requestToSend: true }); }catch(e){}
+          await new Promise(r => setTimeout(r, 150));
+          try{ await p.setSignals({ dataTerminalReady: false, requestToSend: false }); }catch(e){}
+          await new Promise(r => setTimeout(r, 100));
+
+          await new Promise(r => setTimeout(r, 250));
+          try{ await p.close(); }catch(e){}
+
+          smartLog('ok', 'RESET CỨNG', '✓ Đã reset cứng — chip đang boot firmware...');
+
+          if(typeof window.openSpecificPortVip === 'function'){
+            await new Promise(r => setTimeout(r, 600));
+            smartLog('sys', 'TỰ KẾT NỐI', '🔌 Đang tự động mở Serial Monitor kết nối vào ESP...');
+            window.__vipJustFlashed = true;
+            await window.openSpecificPortVip(p);
+            smartLog('ok', 'TỰ KẾT NỐI', '✓ Đã kết nối Serial — đang chờ firmware in MAC...');
+          }else{
+            smartLog('sys', 'HƯỚNG DẪN', 'Bấm nút "🔌 Kết nối Serial" để đọc mã MAC thiết bị.');
+          }
+        }catch(err){
+          const msg = err?.message || String(err);
+          rawLog('[WARN] auto-connect: ' + msg);
+          smartLog('warn', 'TỰ KẾT NỐI', '⚠️ Không tự kết nối được (' + msg + '). Bấm "🔌 Kết nối Serial" để thử lại.');
+          if(typeof toast === 'function') toast('⚠️ Không tự kết nối — bấm Kết nối Serial');
+        }
+      }, 1500);
 
     }catch(err){
       const errMsg = (err && err.message) ? err.message : String(err);
@@ -5352,11 +5390,7 @@ document.addEventListener('mouseout', e => {
   window.openActivateModal = openActivateModal;
   window.closeActivateModal = closeActivateModal;
 
-  openActivateBtn && (openActivateBtn.disabled = true, openActivateBtn.title = 'Tắt tính năng lấy MAC/key trong luồng flash USB – dùng Web Flasher console để copy MAC');
-  openActivateBtn?.addEventListener('click', (event) => {
-    event.preventDefault();
-    if(typeof toast === 'function') toast('⚠️ Chế độ flash USB chỉ giữ lại dữ liệu flash — MAC phải đọc từ CONSOLE_OUTPUT của Web Flasher — NÂNG CAO');
-  });
+  openActivateBtn?.addEventListener('click', openActivateModal);
   closeBtn?.addEventListener('click', async () => { await closePort(); closeActivateModal(); });
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape' && overlay.classList.contains('show')) closeActivateModal();
