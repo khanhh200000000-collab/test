@@ -3020,7 +3020,7 @@
         <div id="vip-page-license-tag" class="vip-mac-status-tag waiting">Sẵn sàng nạp</div>
       </div>
       <div class="vip-action-btns" id="vip-flash-slot">
-        <button id="vip-open-serial-mac" class="btn btn-flash" type="button">🔌 Kết nối & Lấy MAC</button>
+        <button id="vip-open-serial-mac" class="btn btn-flash" type="button">�️ Lấy MAC</button>
       </div>
     </div>
 
@@ -3029,7 +3029,7 @@
         <span class="label"><span class="dot"></span>CONSOLE_OUTPUT</span>
         <button id="vip-mac-copy" class="btn btn-ghost btn-icon" type="button" title="Copy MAC">📋</button>
       </div>
-      <pre class="mf-console" id="vip-mac-console">Sẵn sàng. Bấm "Kết nối & Lấy MAC" để kết nối thiết bị và đọc mã MAC ở đây.</pre>
+      <pre class="mf-console" id="vip-mac-console">Sẵn sàng. Bấm "Lấy MAC" để kết nối thiết bị và đọc mã MAC ở đây.</pre>
     </div>
 
     <div class="vip-grid-2">
@@ -4921,7 +4921,7 @@ document.addEventListener('mouseout', e => {
   const vipFlashBtn = document.createElement('button');
   vipFlashBtn.className = 'btn btn-flash';
   vipFlashBtn.type = 'button';
-  vipFlashBtn.innerHTML = '⚡ Flash qua USB';
+  vipFlashBtn.innerHTML = '⚡ Nạp qua USB';
   vipFlashBtn.id = 'vip-real-flash-btn';
   vipFlashBtn.style.display = 'none';
   slot.prepend(vipFlashBtn);
@@ -4946,7 +4946,7 @@ document.addEventListener('mouseout', e => {
     tag.textContent = '[ESP] ';
     line.appendChild(ts);
     line.appendChild(tag);
-    line.appendChild(document.createTextNode(String(message).replace(/^>\s*/, '')));
+    line.appendChild(document.createTextNode(String(message).replace(/^>\s*/, '').replace(/^\s+/, '')));
     vipMacConsole.appendChild(line);
     vipMacConsole.scrollTop = vipMacConsole.scrollHeight;
   }
@@ -5037,22 +5037,55 @@ document.addEventListener('mouseout', e => {
   async function connectVipSerialAndReadMac(){
     try{
       vipMacConsole.innerHTML = '';
-      addVipConsoleLine('> đang kết nối thiết bị...');
+      vipDetectedMacs = [];
+      if(vipMacCopyBtn) vipMacCopyBtn.disabled = true;
+
       const port = await navigator.serial.requestPort();
       vipSerialPort = port;
-      await port.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none' });
-      addVipConsoleLine('> đã mở cổng Serial 115200 8N1', 'ln-ok');
-      await readVipSerialLoop();
-      await new Promise(r => setTimeout(r, 400));
-      await writeVipSerial('reboot\r\n');
-      addVipConsoleLine('> reboot');
-      await new Promise(r => setTimeout(r, 1200));
-      await writeVipSerial('mac\r\n');
-      addVipConsoleLine('> mac');
-      addVipConsoleLine('> chờ thiết bị in mã MAC...');
-      if(vipMacCopyBtn) vipMacCopyBtn.disabled = false;
+
+      const { ESPLoader, Transport } = await (async () => {
+        if(window.__vipMacEsptoolModule) return window.__vipMacEsptoolModule;
+        const mod = await import('https://unpkg.com/esptool-js/bundle.js');
+        window.__vipMacEsptoolModule = mod;
+        return mod;
+      })();
+
+      const terminal = {
+        clean(){ vipMacConsole.innerHTML = ''; },
+        writeLine(data){
+          const msg = String(data).replace(/\r/g, '').trim();
+          if(!msg) return;
+          addVipConsoleLine(msg);
+          const macs = extractVipMacCandidates(msg);
+          macs.forEach(addDetectedMac);
+        },
+        write(data){
+          const msg = String(data).replace(/\r/g, '').trim();
+          if(!msg) return;
+          addVipConsoleLine(msg);
+          const macs = extractVipMacCandidates(msg);
+          macs.forEach(addDetectedMac);
+        }
+      };
+
+      const transport = new Transport(port, true);
+      const esploader = new ESPLoader({
+        transport,
+        baudrate: 115200,
+        terminal,
+        debugLogging: false,
+      });
+
+      addVipConsoleLine('esptool.js');
+      addVipConsoleLine(`Serial port WebSerial VendorID ${port?.vendorId ? '0x' + port.vendorId.toString(16) : '0x0000'} ProductID ${port?.productId ? '0x' + port.productId.toString(16) : '0x0000'}`);
+      addVipConsoleLine('đang kết nối và nhận diện chip...');
+      addVipConsoleLine('Connecting...');
+      await esploader.main();
+      addVipConsoleLine('Đã kết nối và đọc xong thông tin chip.');
+
+      if(vipDetectedMacs.length && vipMacCopyBtn) vipMacCopyBtn.disabled = false;
     }catch(err){
-      addVipConsoleLine('> không thể kết nối thiết bị: ' + (err?.message || err), 'ln-err');
+      addVipConsoleLine('không thể kết nối thiết bị: ' + (err?.message || err), 'ln-err');
       await disconnectVipSerial();
     }
   }
