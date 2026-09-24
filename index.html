@@ -2680,10 +2680,8 @@
 
   <nav class="top-nav" aria-label="Điều hướng chính">
     <button class="nav-link active" data-view="info">Giới thiệu</button>
-    <button class="nav-link" data-view="firmware">Firmware</button>
     <button class="nav-link" data-view="manual">Web Flasher</button>
     <button class="nav-link nav-link-vip" data-view="tvbgone"><span class="nav-vip-dot"></span>ESP32 Firmware</button>
-    <button class="nav-link" data-view="serial">Serial Monitor</button>
     <button id="sfx-toggle-btn" class="sfx-toggle-btn sfx-on" type="button" title="Âm thanh Cyber Synth (Bấm để bật/tắt)"><span class="sfx-icon">🔊</span> SFX: ON</button>
   </nav>
 
@@ -2789,8 +2787,8 @@
 
           <!-- Laser Engraved Logo Typography -->
           <text x="170" y="148" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="14" fill="#ffffff" font-weight="900" letter-spacing="2">ESP32</text>
-          <text x="170" y="168" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" fill="url(#cyanNeon)" font-weight="800" letter-spacing="1">ULTRA-S3</text>
-          <text x="170" y="184" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#85a995" font-weight="700" letter-spacing="1.5">DUAL-CORE LX7</text>
+          <text x="170" y="168" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" fill="url(#cyanNeon)" font-weight="800" letter-spacing="1">ULTRA</text>
+          <text x="170" y="184" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#85a995" font-weight="700" letter-spacing="1.5">DUAL-CORE</text>
 
           <!-- Status Indicator LEDs -->
           <circle cx="140" cy="204" r="4" fill="#25f4ee" filter="url(#neonGlow)" class="led"/>
@@ -2992,7 +2990,7 @@
           <span class="vip-step-num">1</span>
           <span class="vip-step-title">Nạp Firmware</span>
         </div>
-        <p class="vip-step-desc">Cắm ESP32-C3 qua USB, bấm "Flash qua USB". Mẹo: nếu máy tính không nhận cổng COM, giữ nút <b>BOOT</b> khi cắm cáp.</p>
+        <p class="vip-step-desc">Cắm BeeChat Zero qua USB, bấm "Flash qua USB". Mẹo: nếu máy tính không nhận cổng COM, giữ nút <b>BOOT</b> khi cắm cáp.</p>
       </div>
       <div class="vip-step-card active">
         <div class="vip-step-header">
@@ -3036,8 +3034,8 @@
     <div class="vip-grid-2">
       <div class="vip-subcard">
         <div class="vip-subcard-head">
-          <h3>⚡ Sơ đồ đấu nối chân (Pinout ESP32-C3 Super Mini)</h3>
-          <button id="vip-view-pinout-btn" class="vip-pinout-btn" type="button" title="Bấm để xem ảnh sơ đồ chân chi tiết">
+          <h3>⚡ Sơ đồ chức năng BeeChat Zero</h3>
+          <button id="vip-view-pinout-btn" class="vip-pinout-btn" type="button" title="Bấm để xem ảnh sơ đồ chân chi tiết của BeeChat Zero">
             <span class="vip-pinout-btn-icon">🔍</span> Xem sơ đồ
           </button>
         </div>
@@ -3045,63 +3043,55 @@
           <thead>
             <tr>
               <th>Chức năng</th>
-              <th>Chân GPIO</th>
               <th>Ghi chú</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>Mắt phát hồng ngoại (IR TX)</td>
-              <td><span class="vip-pin-badge gold">GPIO 4</span></td>
-              <td>Phát tín hiệu TV-B-Gone & Jammer</td>
+              <td>Phát tín hiệu IR / điều khiển / chat / game</td>
             </tr>
             <tr>
               <td>Mắt thu hồng ngoại (IR RX)</td>
-              <td><span class="vip-pin-badge">GPIO 3</span></td>
-              <td>Học lệnh & nhận tin nhắn IR</td>
+              <td>Nhận tín hiệu IR, giao tiếp nhị phân & lệnh</td>
             </tr>
             <tr>
-              <td>Màn hình OLED I2C (SDA)</td>
-              <td><span class="vip-pin-badge">GPIO 8</span></td>
+              <td>LoRa / Long Range</td>
+              <td>Truyền xa, mạng sensor, điều khiển và chat dài khoảng cách</td>
+            </tr>
+            <tr>
+              <td>Wi‑Fi 5G / 2.4G</td>
+              <td>Gateway, cập nhật, chat app và kết nối internet</td>
+            </tr>
+            <tr>
+              <td>RF / BLE / NRF24 / NFC / GPS</td>
+              <td>Định vị, truyền dữ liệu, giao tiếp đa chuẩn</td>
+            </tr>
+            <tr>
+              <td>Màn hình OLED I2C</td>
               <td>SSD1306 0.96 inch 128x64</td>
             </tr>
             <tr>
-              <td>Màn hình OLED I2C (SCL)</td>
-              <td><span class="vip-pin-badge">GPIO 9</span></td>
-              <td>SSD1306 0.96 inch 128x64</td>
-            </tr>
-            <tr>
-              <td>Nút bấm UP (Lên)</td>
-              <td><span class="vip-pin-badge">GPIO 5</span></td>
-              <td>Nút bấm kéo trở nội</td>
-            </tr>
-            <tr>
-              <td>Nút bấm DOWN (Xuống)</td>
-              <td><span class="vip-pin-badge">GPIO 6</span></td>
-              <td>Nút bấm kéo trở nội</td>
-            </tr>
-            <tr>
-              <td>Nút bấm OK (Chọn / Giữ)</td>
-              <td><span class="vip-pin-badge gold">GPIO 7</span></td>
-              <td>Giữ để thoát chế độ phát</td>
+              <td>Nút bấm UP / DOWN / OK</td>
+              <td>Điều hướng menu, chat, game, bật/tắt module</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <div class="vip-subcard">
-        <h3>🌟 Tính Năng Nổi Bật Bản VIP</h3>
+        <h3>🌟 Tính Năng Nổi Bật BeeChat Zero</h3>
         <div class="vip-feat-item">
-          <span class="vip-feat-icon">📺</span>
-          <div><b>TV-B-Gone Xuyên Hãng:</b> Tích hợp đầy đủ mã NA, EU, Universal, hỗ trợ tắt hầu như toàn bộ TV phổ biến hiện nay.</div>
+          <span class="vip-feat-icon">�</span>
+          <div><b>LoRa / Long Range:</b> Tính năng cốt lõi của BeeChat Zero: truyền dữ liệu, chat, điều khiển và mạng sensor trên khoảng cách xa.</div>
         </div>
         <div class="vip-feat-item">
-          <span class="vip-feat-icon">📡</span>
-          <div><b>NRF24 Jammer & Spectrum:</b> Tích hợp giao diện quét phổ tần số 2.4GHz và phát xung nhiễu kiểm thử bảo mật.</div>
+          <span class="vip-feat-icon">📶</span>
+          <div><b>Wi‑Fi 5G / Wi‑Fi 2.4G:</b> Kết nối internet, gateway, cập nhật dữ liệu và hỗ trợ chat app khi cần mạng IP.</div>
         </div>
         <div class="vip-feat-item">
           <span class="vip-feat-icon">💬</span>
-          <div><b>IR Messenger:</b> Gửi và nhận tin nhắn văn bản bí mật không dây qua mắt hồng ngoại giữa 2 board.</div>
+          <div><b>IR / RF / BLE / NRF24 / NFC / GPS / Game:</b> Hệ thống đa chuẩn cho điều khiển, định vị, nhắn tin, trò chơi và ứng dụng không dây.</div>
         </div>
       </div>
     </div>
@@ -3109,7 +3099,7 @@
   </section>
 
   <!-- ============================================================
-       🖼️ MODAL XEM ẢNH SƠ ĐỒ CHÂN (PINOUT ESP32-C3 SUPER MINI)
+       🖼️ MODAL XEM ẢNH SƠ ĐỒ CHÂN (BEECHAT ZERO)
        ============================================================ -->
   <div class="pinout-modal-overlay" id="pinout-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pinout-modal-title">
     <div class="pinout-modal-box">
@@ -3123,7 +3113,7 @@
       <div class="pinout-modal-head">
         <div class="pinout-modal-title" id="pinout-modal-title">
           <span class="pinout-pulse-dot"></span>
-          <span>⚡ SƠ ĐỒ CHÂN // ESP32-C3 SUPER MINI PINOUT</span>
+          <span>⚡ SƠ ĐỒ CHÂN // BEECHAT ZERO PINOUT</span>
         </div>
         <div class="pinout-head-actions">
           <a class="pinout-action-link" id="pinout-open-tab-btn" href="pinout.png" target="_blank" rel="noopener" title="Mở ảnh trong tab mới">
@@ -3137,12 +3127,12 @@
 
       <!-- Image Area -->
       <div class="pinout-img-wrap" id="pinout-img-wrap">
-        <img id="pinout-modal-img" src="pinout.png" alt="Sơ đồ đấu nối chân ESP32-C3 Super Mini" loading="eager">
+        <img id="pinout-modal-img" src="pinout.png" alt="Sơ đồ đấu nối chân BeeChat Zero" loading="eager">
         <div class="pinout-placeholder" id="pinout-placeholder" style="display:none;">
           <div class="pinout-placeholder-icon">📷</div>
           <div class="pinout-placeholder-title">Chưa tìm thấy file ảnh sơ đồ</div>
           <div class="pinout-placeholder-desc">
-            Vui lòng copy file ảnh sơ đồ vào cùng thư mục với <code>index.html</code> và đặt tên là:<br>
+            Vui lòng copy file ảnh sơ đồ BeeChat Zero vào cùng thư mục với <code>index.html</code> và đặt tên là:<br>
             <b class="highlight">pinout.png</b> <i>(hoặc pinout.jpg / sodo.png)</i>
           </div>
           <label class="pinout-browse-btn" for="pinout-file-input">
@@ -3221,7 +3211,7 @@
        🌟 MODAL POPUP KÍCH HOẠT VIP (ẢNH 1 - CYBERPUNK OBSIDIAN & 24K GOLD)
        ============================================================ -->
   <div class="vip-activate-overlay" id="vip-activate-overlay">
-    <div class="vip-activate-box" role="dialog" aria-modal="true" aria-label="Kích hoạt TV B Gone">
+    <div class="vip-activate-box" role="dialog" aria-modal="true" aria-label="Kích hoạt BeeChat Zero">
       <!-- 4 Cyber Corner Accents -->
       <div class="cyber-corner top-left"></div>
       <div class="cyber-corner top-right"></div>
@@ -3233,14 +3223,14 @@
         <div class="vip-act-head-title">
           <span class="vip-activate-led" id="vip-act-led"></span>
           <div>
-            <h2><span id="vip-act-title"><span class="vip-title-laser">XÁC THỰC BẢN QUYỀN</span> <span class="vip-title-badge">⚡ TV-B-GONE VIP</span></span></h2>
-            <span class="vip-act-subtitle">// ESP32-C3 SUPER MINI · eFuse NVS SECURITY ENGINE</span>
+            <h2><span id="vip-act-title"><span class="vip-title-laser">XÁC THỰC BẢN QUYỀN</span> <span class="vip-title-badge">⚡ BEECHAT ZERO VIP</span></span></h2>
+            <span class="vip-act-subtitle">// BEECHAT ZERO · LoRa / Wi‑Fi 5G / IR / RF / BLE / NRF24 / NFC / GPS / Chat app / Game</span>
           </div>
         </div>
         <div class="vip-act-head-meta">
           <span class="vip-act-chip-badge">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
-            ESP32-C3 RISC-V 160MHz
+            BeeChat Zero · Multi‑Protocol Board
           </span>
           <button class="vip-activate-close" id="vip-activate-close" type="button" aria-label="Đóng">✕</button>
         </div>
@@ -3408,9 +3398,9 @@
           <div class="cyber-corner bottom-left"></div>
           <div class="cyber-corner bottom-right"></div>
           
-          <span class="vip-pass-badge">★ ELITE LIFETIME VIP PASS ★</span>
-          <h3>TV-B-Gone V2 BEERUSS DIY Edition</h3>
-          <p class="vip-price-desc">Mở khóa vĩnh viễn toàn bộ tính năng cao cấp trên chip ESP32-C3 Super Mini</p>
+          <span class="vip-pass-badge">★ BEECHAT ZERO ELITE PASS ★</span>
+          <h3>BeeChat Zero · LoRa / Wi‑Fi 5G / IR / RF / BLE / NRF24 / NFC / GPS / Chat app / Game</h3>
+          <p class="vip-price-desc">Mở khóa vĩnh viễn LoRa chính và các chức năng đa chuẩn mạng không dây, chat, game, định vị và điều khiển từ xa</p>
           
           <div class="vip-price-amount-wrap">
             <div class="vip-price-amount">40.000đ</div>
@@ -3424,31 +3414,31 @@
         <!-- 4 Benefit Perks -->
         <div class="vip-price-perks">
           <div class="vip-perk-item">
-            <span class="ic">📺</span>
+            <span class="ic">📶</span>
             <div>
-              <b>Tắt TV Mọi Hãng</b>
-              <span>Sony, Samsung, LG, TCL, Casper... NA/EU/Global</span>
+              <b>Wi‑Fi 5G & 2.4G</b>
+              <span>Internet, gateway, điều khiển từ xa, cloud & app</span>
             </div>
           </div>
           <div class="vip-perk-item">
             <span class="ic">📡</span>
             <div>
-              <b>NRF24 Jammer</b>
-              <span>Quét phổ tần & tạo nhiễu tín hiệu 2.4GHz</span>
+              <b>IR / RF / BLE / NRF24</b>
+              <span>Giao tiếp đa chuẩn và truyền dữ liệu không dây hiệu quả</span>
             </div>
           </div>
           <div class="vip-perk-item">
             <span class="ic">💬</span>
             <div>
-              <b>IR Secret Chat</b>
-              <span>Truyền tin nhắn mã hóa qua tia hồng ngoại</span>
+              <b>Chat app & Game</b>
+              <span>Nhắn tin, trò chơi, tương tác và ứng dụng nội bộ</span>
             </div>
           </div>
           <div class="vip-perk-item">
-            <span class="ic">⚡</span>
+            <span class="ic">🛰️</span>
             <div>
-              <b>Cấp Key Siêu Tốc 30s</b>
-              <span>Nhận key tự động qua TikTok, hỗ trợ 24/7</span>
+              <b>NFC / GPS / LoRa</b>
+              <span>Định vị, định tuyến, hub dữ liệu và truyền xa</span>
             </div>
           </div>
         </div>
@@ -3561,9 +3551,9 @@
         </div>
       </div>
 
-      <span class="vip-success-badge">★ VERIFIED LIFETIME VIP PASS ★</span>
+      <span class="vip-success-badge">★ VERIFIED BEECHAT ZERO PASS ★</span>
       <h2 class="vip-success-title">KÍCH HOẠT THÀNH CÔNG!</h2>
-      <p class="vip-success-subtitle">TV-B-Gone V2 BEERUSS DIY Edition · Bản Quyền Vĩnh Viễn Đã Mở Khóa</p>
+      <p class="vip-success-subtitle">BeeChat Zero · LoRa chính / Wi‑Fi 5G / IR / RF / BLE / NRF24 / NFC / GPS / Chat app / Game</p>
 
       <!-- Hardware Chip Identity Banner -->
       <div class="vip-success-chip-box">
@@ -3585,29 +3575,29 @@
         <div class="vip-sperk">
           <span class="sperk-check">✓</span>
           <div>
-            <b>Tắt TV Mọi Hãng</b>
-            <span style="font-size:11px; color:var(--muted); display:block;">Sony, Samsung, LG, TCL, Casper...</span>
+            <b>Wi‑Fi 5G</b>
+            <span style="font-size:11px; color:var(--muted); display:block;">Kết nối internet, gateway, app & cloud</span>
           </div>
         </div>
         <div class="vip-sperk">
           <span class="sperk-check">✓</span>
           <div>
-            <b>NRF24 Jammer</b>
-            <span style="font-size:11px; color:var(--muted); display:block;">Quét phổ & tạo nhiễu 2.4GHz</span>
+            <b>IR / RF / BLE</b>
+            <span style="font-size:11px; color:var(--muted); display:block;">Đa giao thức không dây cho điều khiển & trao đổi dữ liệu</span>
           </div>
         </div>
         <div class="vip-sperk">
           <span class="sperk-check">✓</span>
           <div>
-            <b>IR Secret Chat</b>
-            <span style="font-size:11px; color:var(--muted); display:block;">Truyền tin nhắn mã hoá hồng ngoại</span>
+            <b>NRF24 / NFC / GPS / LoRa</b>
+            <span style="font-size:11px; color:var(--muted); display:block;">Định vị, truyền xa và mạng sensor</span>
           </div>
         </div>
         <div class="vip-sperk">
           <span class="sperk-check">✓</span>
           <div>
-            <b>Đặc Quyền VIP</b>
-            <span style="font-size:11px; color:var(--muted); display:block;">Hỗ trợ & cập nhật FW trọn đời</span>
+            <b>Chat app & Game</b>
+            <span style="font-size:11px; color:var(--muted); display:block;">Tương tác thời gian thực và ứng dụng nội bộ</span>
           </div>
         </div>
       </div>
@@ -4764,7 +4754,7 @@ document.addEventListener('mouseout', e => {
 
 
 // =====================================================================
-// TAB "TV B GONE" — flash VIP + kích hoạt key
+// TAB "BeeChat Zero" — flash VIP + kích hoạt key
 // =====================================================================
 (function tvBGoneTab(){
   let TVBGONE_FILE = 'beechat.bin';
@@ -4831,7 +4821,7 @@ document.addEventListener('mouseout', e => {
         flashTitle.textContent = 'ĐANG KẾT NỐI THIẾT BỊ';
         flashChipIc.textContent = '🔌';
         flashChipDetail.textContent = 'Đang chờ bạn chọn cổng COM...';
-        flashMsg.textContent = msg || 'Hãy chọn cổng COM của board ESP32-C3 trong hộp thoại trình duyệt.';
+        flashMsg.textContent = msg || 'Hãy chọn cổng COM của board BeeChat Zero trong hộp thoại trình duyệt.';
         flashStart.style.display = '';
         flashStart.textContent = '🔌 Kết nối lại';
         flashCancel.style.display = 'none';
@@ -5256,7 +5246,7 @@ document.addEventListener('mouseout', e => {
     window.__vipAutoActivationBlocked = true;
     setProgress(0);
     setFlashState('preparing', 'Đang kết nối bootloader...');
-    smartLog('sys', 'BẮT ĐẦU', '🚀 Bắt đầu nạp firmware TV-B-Gone VIP...');
+    smartLog('sys', 'BẮT ĐẦU', '🚀 Bắt đầu nạp firmware BeeChat Zero VIP...');
 
     currentPort = port;
 
@@ -5333,7 +5323,7 @@ document.addEventListener('mouseout', e => {
       setFlashState('done', '✓ Nạp firmware thành công! Đang tự reset & kết nối lại...');
       setProgress(100);
       smartLog('ok', 'FLASH XONG', '🎉 Flash thành công! Đang tự reset cứng và kết nối lại Serial...');
-      if(typeof toast === 'function') toast('🎉 Flash TV B Gone VIP thành công!');
+      if(typeof toast === 'function') toast('🎉 Flash BeeChat Zero VIP thành công!');
       CyberAudio.successChime();
       if(typeof window.closeActivateModal === 'function') {
         window.closeActivateModal();
@@ -5385,7 +5375,7 @@ document.addEventListener('mouseout', e => {
 
     }catch(err){
       const errMsg = (err && err.message) ? err.message : String(err);
-      console.error('[TVBGone Flash]', err);
+      console.error('[BeeChat Flash]', err);
       setFlashState('error', `⚠️ ${errMsg}`);
       smartLog('err', 'LỖI FLASH', `❌ ${errMsg}`);
       if(typeof toast === 'function') toast('Flash thất bại — xem log để biết chi tiết');
@@ -5577,7 +5567,7 @@ document.addEventListener('mouseout', e => {
     if(/^=+$/.test(line)) return;
 
     if(line.includes('XAC THUC FIRMWARE') && line.includes('BEERUSS DIY')){
-      smartLog('sys', 'XÁC THỰC FW', '⚡ Đã khởi động module xác thực firmware TV-B-Gone VIP — BEERUSS DIY');
+      smartLog('sys', 'XÁC THỰC FW', '⚡ Đã khởi động module xác thực firmware BeeChat Zero VIP — BEERUSS DIY');
       return;
     }
 
@@ -5601,7 +5591,7 @@ document.addEventListener('mouseout', e => {
     else if(line.includes('KICH HOAT THANH CONG') || line.includes('KICH HOAT OK') || line.includes('[OK] Da luu key vao NVS')){
       setLicenseState('active');
       smartLog('ok', 'BẢN QUYỀN', '🎉 KÍCH HOẠT THÀNH CÔNG! Thiết bị đã lưu bản quyền vĩnh viễn vào NVS.');
-      if(typeof toast === 'function') toast('🎉 Kích hoạt TV-B-Gone VIP thành công!');
+      if(typeof toast === 'function') toast('🎉 Kích hoạt BeeChat Zero VIP thành công!');
       if(typeof triggerVipActivationCelebration === 'function') triggerVipActivationCelebration(detectedMac);
     }
     else if(line.includes('CHUA KICH HOAT')){
@@ -5645,7 +5635,7 @@ document.addEventListener('mouseout', e => {
 
   macTiktokBtn.addEventListener('click', async () => {
     if(!detectedMac) return;
-    const msg = `Chào shop hungesp32bw16, mình muốn mua key kích hoạt TV-B-Gone cho MAC: ${detectedMac}`;
+    const msg = `Chào shop hungesp32bw16, mình muốn mua key kích hoạt BeeChat Zero cho MAC: ${detectedMac}`;
     try{
       await navigator.clipboard.writeText(msg);
       macTiktokBtn.textContent = '✓ Đã copy tin nhắn';
