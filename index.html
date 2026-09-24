@@ -2995,16 +2995,16 @@
       <div class="vip-step-card active">
         <div class="vip-step-header">
           <span class="vip-step-num">2</span>
-          <span class="vip-step-title">Lấy MAC & Gửi TikTok</span>
+          <span class="vip-step-title">Lấy MAC</span>
         </div>
-        <p class="vip-step-desc">Flash xong bảng kích hoạt sẽ <b>tự động bật lên</b> và lấy ngay mã MAC. Bấm nút copy để gửi cho shop cấp key.</p>
+        <p class="vip-step-desc">Flash xong ấn lấy mac<b>Kết nối</b> và lấy ngay mã MAC. Bấm nút copy để gửi cho shop cấp key.</p>
       </div>
       <div class="vip-step-card active">
         <div class="vip-step-header">
           <span class="vip-step-num">3</span>
           <span class="vip-step-title">Nhập Key & Hoàn Tất</span>
         </div>
-        <p class="vip-step-desc">Dán mã key (tối đa 160 ký tự hex) nhận từ shop vào ô và bấm Kích hoạt. Thiết bị tự lưu vào bộ nhớ NVS vĩnh viễn.</p>
+        <p class="vip-step-desc">Shop cấp mã pin 6 số để kích hoạt thiết bị vĩnh viễn</p>
       </div>
     </div>
 
@@ -3859,7 +3859,7 @@ if (sfxToggleBtn) {
 }
 
 // ============================================================
-// 🖼️ MODAL XEM ẢNH SƠ ĐỒ CHÂN (PINOUT ESP32-C3 SUPER MINI)
+// 🖼️ MODAL XEM ẢNH SƠ ĐỒ CHÂN (PINOUT ESP32-C3 ESP32)
 // ============================================================
 (function initPinoutModal() {
   const overlay = document.getElementById('pinout-modal-overlay');
@@ -4757,9 +4757,9 @@ document.addEventListener('mouseout', e => {
 // TAB "BeeChat Zero" — flash VIP + kích hoạt key
 // =====================================================================
 (function tvBGoneTab(){
-  let TVBGONE_FILE = 'beechat.bin';
-  let TVBGONE_OFFSET = 0x0;
-  let TVBGONE_BOARD = 'ESP32';
+  let BEEZERO_FILE = 'beechat.bin';
+  let BEEZERO = 0x0;
+  let BEECHATZERO = 'ESP32';
 
   const compat = document.getElementById('vip-flash-compat');
   const slot = document.getElementById('vip-flash-slot');
@@ -4887,7 +4887,7 @@ document.addEventListener('mouseout', e => {
       default:
         flashTitle.textContent = 'SẴN SÀNG NẠP FIRMWARE';
         flashChipIc.textContent = '🔌';
-        flashChipDetail.textContent = `${TVBGONE_BOARD} · ${TVBGONE_FILE}`;
+        flashChipDetail.textContent = `${BEECHATZERO} · ${BEEZERO_FILE}`;
         flashMsg.textContent = msg || 'Bấm "Bắt đầu nạp" để tiến hành flash firmware qua USB.';
         flashStart.style.display = '';
         flashStart.textContent = '⚡ Bắt đầu nạp';
@@ -5177,40 +5177,40 @@ document.addEventListener('mouseout', e => {
     ) || all[0];
 
     if(!selectedItem || !selectedItem.file){
-      console.warn('[ESP32 Firmware] Không tìm thấy entry hợp lệ trong firmware.json — dùng config mặc định:', TVBGONE_FILE);
+      console.warn('[ESP32 Firmware] Không tìm thấy entry hợp lệ trong firmware.json — dùng config mặc định:', BEEZERO_FILE);
       return;
     }
 
-    TVBGONE_FILE = selectedItem.file;
-    TVBGONE_BOARD = selectedItem.board || TVBGONE_BOARD;
-    TVBGONE_OFFSET = (selectedItem.offset != null) ? parseInt(selectedItem.offset, 16) : 0x0;
-    if(Number.isNaN(TVBGONE_OFFSET)) TVBGONE_OFFSET = 0x0;
+    BEEZERO_FILE = selectedItem.file;
+    BEECHATZERO = selectedItem.board || BEECHATZERO;
+    BEEZERO = (selectedItem.offset != null) ? parseInt(selectedItem.offset, 16) : 0x0;
+    if(Number.isNaN(BEEZERO)) BEEZERO = 0x0;
 
     const dlLink = slot.querySelector('a[download]');
     if(dlLink){
-      dlLink.href = `firmware/${encodeURIComponent(TVBGONE_FILE)}`;
-      dlLink.setAttribute('download', TVBGONE_FILE);
+      dlLink.href = `firmware/${encodeURIComponent(BEEZERO_FILE)}`;
+      dlLink.setAttribute('download', BEEZERO_FILE);
     }
 
     if(flashChipName){
-      flashChipName.textContent = `${TVBGONE_BOARD} · ${TVBGONE_FILE}`;
+      flashChipName.textContent = `${BEECHATZERO} · ${BEEZERO_FILE}`;
     }
     if(flashChipDetail && !/đang|Đang/.test(flashChipDetail.textContent)){
-      flashChipDetail.textContent = `${TVBGONE_BOARD} Super Mini · ${TVBGONE_FILE}`;
+      flashChipDetail.textContent = `${BEECHATZERO} ESP32 · ${BEEZERO_FILE}`;
     }
 
     const pageLabel = document.querySelector('.vip-chip-label span:last-child');
     if(pageLabel){
-      pageLabel.textContent = `${TVBGONE_FILE} · ${TVBGONE_BOARD} Super Mini`;
+      pageLabel.textContent = `${BEEZERO_FILE} · ${BEECHATZERO} ESP32`;
     }
 
     const specB = document.querySelectorAll('.vip-spec-strip .spec b');
     const specS = document.querySelectorAll('.vip-spec-strip .spec span');
-    if(specB[0]) specB[0].textContent = TVBGONE_BOARD;
+    if(specB[0]) specB[0].textContent = BEECHATZERO;
     if(specB[1] && selectedItem.version) specB[1].textContent = 'v' + selectedItem.version;
     if(specB[2] && selectedItem.size) specB[2].textContent = selectedItem.size;
     if(specB[3]) specB[3].textContent = 'NVS Auth';
-    if(specS[0]) specS[0].textContent = 'Super Mini';
+    if(specS[0]) specS[0].textContent = 'ESP32';
     if(specS[1] && selectedItem.date) specS[1].textContent = 'Build ' + selectedItem.date;
     if(specS[2]) specS[2].textContent = 'Dung lượng ROM';
     if(specS[3]) specS[3].textContent = 'Lưu key vĩnh viễn';
@@ -5222,9 +5222,9 @@ document.addEventListener('mouseout', e => {
 
     console.log('[ESP32 Firmware] ✅ Đã load config từ firmware.json:', {
       name: selectedItem.name,
-      file: TVBGONE_FILE,
-      board: TVBGONE_BOARD,
-      offset: '0x' + TVBGONE_OFFSET.toString(16)
+      file: BEEZERO_FILE,
+      board: BEECHATZERO,
+      offset: '0x' + BEEZERO.toString(16)
     });
   });
 
@@ -5278,20 +5278,20 @@ document.addEventListener('mouseout', e => {
       const chipName = await esploader.main();
       smartLog('ok', 'CHIP', `✓ Đã nhận diện chip: ${chipName}`);
       setFlashState('flashing', `Đã nhận diện ${chipName}. Đang tải firmware...`);
-      flashChipName.textContent = `${chipName} · ${TVBGONE_FILE}`;
+      flashChipName.textContent = `${chipName} · ${BEEZERO_FILE}`;
 
-      smartLog('sys', 'TẢI FILE', `📥 Đang tải ${TVBGONE_FILE}...`);
-      const fileUrl = new URL(`firmware/${TVBGONE_FILE}`, window.location.href).href;
+      smartLog('sys', 'TẢI FILE', `📥 Đang tải ${BEEZERO_FILE}...`);
+      const fileUrl = new URL(`firmware/${BEEZERO_FILE}`, window.location.href).href;
       const resp = await fetch(fileUrl);
       if(!resp.ok){
-        throw new Error(`Không tải được firmware ${TVBGONE_FILE} (HTTP ${resp.status})`);
+        throw new Error(`Không tải được firmware ${BEEZERO_FILE} (HTTP ${resp.status})`);
       }
       const buf = await resp.arrayBuffer();
       const data = new Uint8Array(buf);
       smartLog('ok', 'TẢI FILE', `✓ Đã tải firmware: ${(data.length / 1024).toFixed(1)} KB`);
-      flashChipDetail.textContent = `Kích thước: ${(data.length / 1024).toFixed(1)} KB · Offset: 0x${TVBGONE_OFFSET.toString(16)}`;
+      flashChipDetail.textContent = `Kích thước: ${(data.length / 1024).toFixed(1)} KB · Offset: 0x${BEEZERO.toString(16)}`;
 
-      smartLog('sys', 'GHI FLASH', `⚡ Bắt đầu ghi ${(data.length / 1024).toFixed(1)} KB vào địa chỉ 0x${TVBGONE_OFFSET.toString(16)}...`);
+      smartLog('sys', 'GHI FLASH', `⚡ Bắt đầu ghi ${(data.length / 1024).toFixed(1)} KB vào địa chỉ 0x${BEEZERO.toString(16)}...`);
       setFlashState('flashing', 'Đang ghi dữ liệu vào flash — KHÔNG rút cáp!');
 
       const eraseAll = document.getElementById('vip-flash-erase')?.checked || false;
@@ -5300,7 +5300,7 @@ document.addEventListener('mouseout', e => {
       }
 
       await esploader.writeFlash({
-        fileArray: [{ data, address: TVBGONE_OFFSET }],
+        fileArray: [{ data, address: BEEZERO }],
         flashMode: 'keep',
         flashFreq: 'keep',
         flashSize: 'keep',
