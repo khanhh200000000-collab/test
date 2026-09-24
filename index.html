@@ -2682,7 +2682,7 @@
     <button class="nav-link active" data-view="info">Giới thiệu</button>
     <button class="nav-link" data-view="firmware">Firmware</button>
     <button class="nav-link" data-view="manual">Web Flasher</button>
-    <button class="nav-link nav-link-vip" data-view="tvbgone"><span class="nav-vip-dot"></span>ESP32 Firmware</button>
+    <button class="nav-link nav-link-vip" data-view="tvbgone"><span class="nav-vip-dot"></span>TV B Gone</button>
     <button class="nav-link" data-view="serial">Serial Monitor</button>
     <button id="sfx-toggle-btn" class="sfx-toggle-btn sfx-on" type="button" title="Âm thanh Cyber Synth (Bấm để bật/tắt)"><span class="sfx-icon">🔊</span> SFX: ON</button>
   </nav>
@@ -2973,17 +2973,17 @@
 
     <div class="vip-hero">
       <div>
-        <span class="vip-badge">★ ESP32 STANDARD FIRMWARE · BEECHAT / BEE443 / BW16</span>
-        <h2>ESP32 Firmware Hub — BEERUSS DIY Edition</h2>
-        <p>Firmware ESP32 thường với 3 bản chính: beechat.bin, bee443.bin và bw16.bin. Nạp trực tiếp qua USB bằng trình duyệt.</p>
+        <span class="vip-badge">★ VIP TV-B-GONE PRO · ESP32-C3 SUPER MINI</span>
+        <h2>TV B Gone — BEERUSS DIY Edition (v2.0)</h2>
+        <p>Firmware đa năng tích hợp TV-B-Gone tắt TV mọi hãng, Thu chép ir, NRF Jammer & IR Messenger.</p>
       </div>
     </div>
 
     <div class="vip-spec-strip">
-      <div class="spec"><b>ESP32</b><span>Standard Board</span></div>
-      <div class="spec"><b>v1.0.0</b><span>Build 23/09/2026</span></div>
-      <div class="spec"><b>1.8 MB</b><span>Dung lượng ROM</span></div>
-      <div class="spec"><b>USB</b><span>Flash trực tiếp</span></div>
+      <div class="spec"><b>ESP32-C3</b><span>Super Mini (RISC-V)</span></div>
+      <div class="spec"><b>v2.0.0</b><span>Build 16/09/2026</span></div>
+      <div class="spec"><b>710 KB</b><span>Dung lượng ROM</span></div>
+      <div class="spec"><b>NVS Auth</b><span>Lưu key vĩnh viễn</span></div>
     </div>
 
     <div class="vip-stepper">
@@ -3015,13 +3015,13 @@
       <div class="vip-main-top">
         <div class="vip-chip-label">
           <span class="mf-led on"></span>
-          <span>beechat.bin · ESP32 Standard</span>
+          <span>TvBGoneV2HungTesp.bin · ESP32-C3 Super Mini</span>
         </div>
         <div id="vip-page-license-tag" class="vip-mac-status-tag waiting">Sẵn sàng nạp</div>
       </div>
       <div class="vip-action-btns" id="vip-flash-slot">
-        <a class="btn btn-secondary" href="firmware/beechat.bin" download>Tải firmware (.bin)</a>
-        <button id="vip-open-activate" class="btn btn-flash" type="button">⚡ Nạp nhanh bằng USB</button>
+        <a class="btn btn-secondary" href="firmware/TvBGoneV2HungTesp.bin" download>Tải firmware (.bin)</a>
+        <button id="vip-open-activate" class="btn btn-flash" type="button">🔑 Mở Bảng Kích Hoạt VIP & Lấy MAC</button>
       </div>
     </div>
 
@@ -4721,9 +4721,9 @@ document.addEventListener('mouseout', e => {
 // TAB "TV B GONE" — flash VIP + kích hoạt key
 // =====================================================================
 (function tvBGoneTab(){
-  let TVBGONE_FILE = 'beechat.bin';
+  let TVBGONE_FILE = 'TvBGoneV2HungTesp.bin';
   let TVBGONE_OFFSET = 0x0;
-  let TVBGONE_BOARD = 'ESP32';
+  let TVBGONE_BOARD = 'ESP32-C3';
 
   const compat = document.getElementById('vip-flash-compat');
   const slot = document.getElementById('vip-flash-slot');
@@ -5255,8 +5255,16 @@ document.addEventListener('mouseout', e => {
     setLicenseState('unknown');
   }
 
+  function normalizeMacString(raw){
+    if(!raw) return null;
+    const cleaned = String(raw).replace(/^0x/i, '').replace(/[-:]/g, '').replace(/\s+/g, '').replace(/[^0-9A-F]/gi, '');
+    if(!/^[0-9A-F]{12}$/i.test(cleaned)) return null;
+    return cleaned.match(/.{2}/g).join(':').toUpperCase();
+  }
+
   function setDetectedMac(macStr){
-    detectedMac = macStr.toUpperCase();
+    const normalized = normalizeMacString(macStr);
+    detectedMac = normalized || String(macStr).trim().toUpperCase();
     macValueEl.textContent = detectedMac;
     macValueEl.classList.remove('pending');
     macStatusTag.className = 'vip-mac-status-tag detected';
@@ -5273,17 +5281,20 @@ document.addEventListener('mouseout', e => {
   }
 
   function extractMacFromLine(line){
-    let m = line.match(/MAC\s*[:=]\s*(?:0x)?([0-9A-Fa-f]{6,16})/i);
-    if(m) return '0x' + m[1].replace(/^0x/i, '').toUpperCase();
+    const patterns = [
+      /(?:^|[^A-Fa-f0-9])MAC\s*[:=]\s*(?:0x)?([0-9A-Fa-f]{2}(?:[:-]?[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{12})(?:\b|$)/i,
+      /(?:^|[^A-Fa-f0-9])(?:WIFI|WLAN|ETH|MAC)\s*[:=]?\s*(?:0x)?([0-9A-Fa-f]{2}(?:[:-]?[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{12})(?:\b|$)/i,
+      /\b([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})\b/,
+      /\b(?:0x)?([0-9A-Fa-f]{12})\b/i
+    ];
 
-    m = line.match(/\[?MAC\]?\s*[:=]?\s*(?:0x)?([0-9A-Fa-f]{6,16})\b/i);
-    if(m) return '0x' + m[1].replace(/^0x/i, '').toUpperCase();
-
-    m = line.match(/\b(?:0x)?([0-9A-Fa-f]{8})\b/);
-    if(m && /mac|chip|efuse|id/i.test(line)) return '0x' + m[1].toUpperCase();
-
-    m = line.match(/\b([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})\b/);
-    if(m) return m[1].replace(/-/g, ':').toUpperCase();
+    for(const pattern of patterns){
+      const match = line.match(pattern);
+      if(match){
+        const normalized = normalizeMacString(match[1]);
+        if(normalized) return normalized;
+      }
+    }
 
     return null;
   }
