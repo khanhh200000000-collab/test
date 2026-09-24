@@ -3178,7 +3178,7 @@
       <div class="vip-flash-chipinfo">
         <span class="ic" id="vip-flash-chip-ic">🔌</span>
         <div class="txt">
-          <b id="vip-flash-chip-name">ESP32-C3 · TvBGoneV2HungTesp.bin</b>
+          <b id="vip-flash-chip-name">ESP32 · beechat.bin</b>
           <span id="vip-flash-chip-detail">Đang chờ kết nối thiết bị...</span>
         </div>
       </div>
@@ -4006,7 +4006,39 @@ const sortEl = document.getElementById('sort');
 const tabsEl = document.getElementById('board-tabs');
 const toastStack = document.getElementById('toast-stack');
 const topBtn = document.getElementById('top-btn');
-let ALL = [];
+const DEFAULT_FIRMWARE_ITEMS = [
+  {
+    name: 'BeeChat',
+    board: 'ESP32',
+    version: '1.0.0',
+    date: '2026-09-23',
+    size: '1.8 MB',
+    description: 'Firmware ESP32 thường - BeeChat',
+    file: 'beechat.bin',
+    author: 'esp32'
+  },
+  {
+    name: 'Bee443',
+    board: 'ESP32',
+    version: '1.0.0',
+    date: '2026-09-23',
+    size: '1.9 MB',
+    description: 'Firmware ESP32 thường - Bee443',
+    file: 'bee443.bin',
+    author: 'esp32'
+  },
+  {
+    name: 'BW16',
+    board: 'ESP32',
+    version: '1.0.0',
+    date: '2026-09-23',
+    size: '1.7 MB',
+    description: 'Firmware ESP32 thường - BW16',
+    file: 'bw16.bin',
+    author: 'esp32'
+  }
+];
+let ALL = DEFAULT_FIRMWARE_ITEMS;
 let activeBoard = 'all';
 let viewMode = 'grid';
 
@@ -4184,7 +4216,7 @@ function updateStats(){
 fetch('firmware.json')
   .then(r => { if(!r.ok) throw new Error('http ' + r.status); return r.json(); })
   .then(data => {
-    ALL = Array.isArray(data) ? data : [];
+    ALL = Array.isArray(data) && data.length ? data : DEFAULT_FIRMWARE_ITEMS;
     buildTabs();
     updateStats();
     render();
@@ -4192,8 +4224,11 @@ fetch('firmware.json')
     window.dispatchEvent(new CustomEvent('firmware-loaded', { detail: ALL }));
   })
   .catch(() => {
-    grid.innerHTML = `<div class="empty">&gt; lỗi: không đọc được firmware.json.<br>Kiểm tra file có tồn tại ở gốc repo và đúng định dạng JSON.<br><button class="btn btn-ghost" id="retry-fetch">Thử lại</button></div>`;
-    document.getElementById('retry-fetch')?.addEventListener('click', () => location.reload());
+    ALL = DEFAULT_FIRMWARE_ITEMS;
+    buildTabs();
+    updateStats();
+    render();
+    window.dispatchEvent(new CustomEvent('firmware-loaded', { detail: ALL }));
   });
 searchEl.addEventListener('input', render);
 sortEl.addEventListener('change', render);
@@ -5140,18 +5175,20 @@ document.addEventListener('mouseout', e => {
     const all = e.detail || [];
     if(!Array.isArray(all) || !all.length) return;
 
-    const tvbItem = all.find(it => 
-      typeof it.name === 'string' && /tv\s*[-_.]?\s*b[\s-]?gone/i.test(it.name)
-    );
+    const selectedItem = all.find(it =>
+      typeof it.file === 'string' && /beechat|bee443|bw16/i.test(it.file)
+    ) || all.find(it =>
+      typeof it.name === 'string' && /beechat|bee443|bw16/i.test(it.name)
+    ) || all[0];
 
-    if(!tvbItem || !tvbItem.file){
-      console.warn('[TV B Gone] Không tìm thấy entry trong firmware.json — dùng config mặc định:', TVBGONE_FILE);
+    if(!selectedItem || !selectedItem.file){
+      console.warn('[ESP32 Firmware] Không tìm thấy entry hợp lệ trong firmware.json — dùng config mặc định:', TVBGONE_FILE);
       return;
     }
 
-    TVBGONE_FILE = tvbItem.file;
-    TVBGONE_BOARD = tvbItem.board || TVBGONE_BOARD;
-    TVBGONE_OFFSET = (tvbItem.offset != null) ? parseInt(tvbItem.offset, 16) : 0x0;
+    TVBGONE_FILE = selectedItem.file;
+    TVBGONE_BOARD = selectedItem.board || TVBGONE_BOARD;
+    TVBGONE_OFFSET = (selectedItem.offset != null) ? parseInt(selectedItem.offset, 16) : 0x0;
     if(Number.isNaN(TVBGONE_OFFSET)) TVBGONE_OFFSET = 0x0;
 
     const dlLink = slot.querySelector('a[download]');
@@ -5175,21 +5212,21 @@ document.addEventListener('mouseout', e => {
     const specB = document.querySelectorAll('.vip-spec-strip .spec b');
     const specS = document.querySelectorAll('.vip-spec-strip .spec span');
     if(specB[0]) specB[0].textContent = TVBGONE_BOARD;
-    if(specB[1] && tvbItem.version) specB[1].textContent = 'v' + tvbItem.version;
-    if(specB[2] && tvbItem.size) specB[2].textContent = tvbItem.size;
+    if(specB[1] && selectedItem.version) specB[1].textContent = 'v' + selectedItem.version;
+    if(specB[2] && selectedItem.size) specB[2].textContent = selectedItem.size;
     if(specB[3]) specB[3].textContent = 'NVS Auth';
     if(specS[0]) specS[0].textContent = 'Super Mini';
-    if(specS[1] && tvbItem.date) specS[1].textContent = 'Build ' + tvbItem.date;
+    if(specS[1] && selectedItem.date) specS[1].textContent = 'Build ' + selectedItem.date;
     if(specS[2]) specS[2].textContent = 'Dung lượng ROM';
     if(specS[3]) specS[3].textContent = 'Lưu key vĩnh viễn';
 
     const heroP = document.querySelector('.vip-hero p');
-    if(heroP && tvbItem.description){
-      heroP.textContent = tvbItem.description;
+    if(heroP && selectedItem.description){
+      heroP.textContent = selectedItem.description;
     }
 
-    console.log('[TV B Gone] ✅ Đã load config từ firmware.json:', {
-      name: tvbItem.name,
+    console.log('[ESP32 Firmware] ✅ Đã load config từ firmware.json:', {
+      name: selectedItem.name,
       file: TVBGONE_FILE,
       board: TVBGONE_BOARD,
       offset: '0x' + TVBGONE_OFFSET.toString(16)
