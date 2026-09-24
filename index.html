@@ -4921,9 +4921,10 @@ document.addEventListener('mouseout', e => {
   const vipFlashBtn = document.createElement('button');
   vipFlashBtn.className = 'btn btn-flash';
   vipFlashBtn.type = 'button';
-  vipFlashBtn.innerHTML = '⚡ Nạp qua USB';
+  vipFlashBtn.innerHTML = '⚡ Nạp beechat.bin';
   vipFlashBtn.id = 'vip-real-flash-btn';
-  vipFlashBtn.style.display = 'none';
+  vipFlashBtn.style.display = '';
+  vipFlashBtn.title = 'Nạp firmware beechat.bin qua USB';
   slot.prepend(vipFlashBtn);
 
   let vipSerialPort = null;
@@ -5367,8 +5368,11 @@ document.addEventListener('mouseout', e => {
   if(!canFlashInBrowser){
     compat.innerHTML = `<div class="compat-banner warn"><span class="ic">⚠</span><div>Trình duyệt này chưa hỗ trợ flash qua web — dùng nút <b>Tải firmware (.bin)</b> rồi nạp bằng esptool, hoặc mở trang bằng Chrome/Edge trên máy tính.</div></div>`;
     vipFlashBtn.disabled = true;
+    vipFlashBtn.title = 'Web Serial không hỗ trợ trên trình duyệt này';
   }else{
-    compat.innerHTML = `<div class="compat-banner ok"><span class="ic">✓</span><div><b>Trình duyệt hỗ trợ Web Serial.</b> Bấm <b>Flash qua USB</b> để nạp firmware TV-B-Gone VIP trực tiếp.</div></div>`;
+    compat.innerHTML = `<div class="compat-banner ok"><span class="ic">✓</span><div><b>Trình duyệt hỗ trợ Web Serial.</b> Bấm <b>⚡ Nạp beechat.bin</b> để nạp firmware trực tiếp qua USB.</div></div>`;
+    vipFlashBtn.disabled = false;
+    vipFlashBtn.style.display = '';
   }
 
   // ====== MODAL KÍCH HOẠT ======
