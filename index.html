@@ -2975,7 +2975,7 @@
       <div>
         <span class="vip-badge">★ ESP32 STANDARD FIRMWARE · BEECHAT / BEE443 / BW16</span>
         <h2>ESP32 Firmware Hub — BEERUSS DIY Edition</h2>
-        <p>Firmware ESP32 thường với 3 bản chính: beechat.bin, bee443.bin và bw16.bin. Nạp trực tiếp qua USB bằng trình duyệt.</p>
+        <p>Firmware ESP32 thường với 3 bản chính: beechat, bee443.bin và bw16.bin. Nạp trực tiếp qua USB bằng trình duyệt.</p>
       </div>
     </div>
 
@@ -3015,7 +3015,7 @@
       <div class="vip-main-top">
         <div class="vip-chip-label">
           <span class="mf-led on"></span>
-          <span>beechat.bin · ESP32 Standard</span>
+          <span>BEECHAT · ESP32 Standard</span>
         </div>
         <div id="vip-page-license-tag" class="vip-mac-status-tag waiting">Sẵn sàng nạp</div>
       </div>
@@ -3170,7 +3170,7 @@
       <div class="vip-flash-chipinfo">
         <span class="ic" id="vip-flash-chip-ic">🔌</span>
         <div class="txt">
-          <b id="vip-flash-chip-name">ESP32 · beechat.bin</b>
+          <b id="vip-flash-chip-name">ESP32 · BEECHAT</b>
           <span id="vip-flash-chip-detail">Đang chờ kết nối thiết bị...</span>
         </div>
       </div>
@@ -4953,10 +4953,10 @@ document.addEventListener('mouseout', e => {
   const vipFlashBtn = document.createElement('button');
   vipFlashBtn.className = 'btn btn-flash';
   vipFlashBtn.type = 'button';
-  vipFlashBtn.innerHTML = '⚡ Nạp beechat.bin';
+  vipFlashBtn.innerHTML = '⚡ Nạp beechat';
   vipFlashBtn.id = 'vip-real-flash-btn';
   vipFlashBtn.style.display = '';
-  vipFlashBtn.title = 'Nạp firmware beechat.bin qua USB';
+  vipFlashBtn.title = 'Nạp firmware beechat qua USB';
   slot.prepend(vipFlashBtn);
 
   let vipSerialPort = null;
@@ -5427,7 +5427,7 @@ document.addEventListener('mouseout', e => {
     vipFlashBtn.disabled = true;
     vipFlashBtn.title = 'Web Serial không hỗ trợ trên trình duyệt này';
   }else{
-    compat.innerHTML = `<div class="compat-banner ok"><span class="ic">✓</span><div><b>Trình duyệt hỗ trợ Web Serial.</b> Bấm <b>⚡ Nạp beechat.bin</b> để nạp firmware trực tiếp qua USB.</div></div>`;
+    compat.innerHTML = `<div class="compat-banner ok"><span class="ic">✓</span><div><b>Trình duyệt hỗ trợ Web Serial.</b> Bấm <b>⚡ Nạp beechat</b> để nạp firmware trực tiếp qua USB.</div></div>`;
     vipFlashBtn.disabled = false;
     vipFlashBtn.style.display = '';
   }
