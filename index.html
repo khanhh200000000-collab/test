@@ -5493,10 +5493,10 @@ document.addEventListener('mouseout', e => {
     }, 400);
 
     if(typeof window.openActivateModal === 'function'){
+      window.openActivateModal();
       setTimeout(async () => {
         try{ await closePort(); }catch(e){}
-        window.openActivateModal();
-      }, 400);
+      }, 250);
     }
   }
 
@@ -5698,8 +5698,21 @@ document.addEventListener('mouseout', e => {
 
   async function closePort(){
     reading = false;
+    const currentPort = port;
+
     try{ if(reader) await reader.cancel(); }catch(e){}
-    try{ if(port) await port.close(); }catch(e){}
+    try{ if(currentPort && currentPort.readable){
+      const tempReader = currentPort.readable.getReader();
+      await tempReader.cancel();
+      tempReader.releaseLock();
+    }}catch(e){}
+    try{ if(currentPort && currentPort.writable){
+      const tempWriter = currentPort.writable.getWriter();
+      await tempWriter.close();
+      tempWriter.releaseLock();
+    }}catch(e){}
+    try{ if(currentPort && typeof currentPort.close === 'function') await currentPort.close(); }catch(e){}
+
     reader = null; port = null; buffer = '';
     disconnectedUI();
   }
@@ -5719,8 +5732,13 @@ document.addEventListener('mouseout', e => {
 
   async function openSpecificPort(p){
     try{
+      if(port && typeof port.close === 'function'){
+        await closePort();
+      }
       port = p;
-      await port.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none' });
+      if(port && !port.readable && !port.writable){
+        await port.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none' });
+      }
       CyberAudio.connectPing();
       resetMacDisplay();
       smartLog('sys', 'KẾT NỐI', '🔌 Đã mở cổng Web Serial thành công (115200 baud).');
