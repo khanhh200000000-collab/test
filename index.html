@@ -3020,9 +3020,16 @@
         <div id="vip-page-license-tag" class="vip-mac-status-tag waiting">Sẵn sàng nạp</div>
       </div>
       <div class="vip-action-btns" id="vip-flash-slot">
-        <a class="btn btn-secondary" href="firmware/beechat.bin" download>Tải firmware (.bin)</a>
-        <button id="vip-open-activate" class="btn btn-flash" type="button">⚡ Nạp nhanh bằng USB</button>
+        <button id="vip-open-serial-mac" class="btn btn-flash" type="button">🔌 Kết nối & Lấy MAC</button>
       </div>
+    </div>
+
+    <div class="mf-console-wrap">
+      <div class="mf-console-head">
+        <span class="label"><span class="dot"></span>CONSOLE_OUTPUT</span>
+        <button id="vip-mac-copy" class="btn btn-ghost btn-icon" type="button" title="Copy MAC">📋</button>
+      </div>
+      <pre class="mf-console" id="vip-mac-console">Sẵn sàng. Bấm "Kết nối & Lấy MAC" để kết nối thiết bị và đọc mã MAC ở đây.</pre>
     </div>
 
     <div class="vip-grid-2">
@@ -4727,7 +4734,9 @@ document.addEventListener('mouseout', e => {
 
   const compat = document.getElementById('vip-flash-compat');
   const slot = document.getElementById('vip-flash-slot');
-  const openActivateBtn = document.getElementById('vip-open-activate');
+  const serialMacBtn = document.getElementById('vip-open-serial-mac');
+  const vipMacConsole = document.getElementById('vip-mac-console');
+  const vipMacCopyBtn = document.getElementById('vip-mac-copy');
   if(!slot) return;
 
   // ====== UI FLASH PROGRESS VIP ======
@@ -4914,13 +4923,157 @@ document.addEventListener('mouseout', e => {
   vipFlashBtn.type = 'button';
   vipFlashBtn.innerHTML = '⚡ Flash qua USB';
   vipFlashBtn.id = 'vip-real-flash-btn';
+  vipFlashBtn.style.display = 'none';
   slot.prepend(vipFlashBtn);
 
-  // ====== LẮNG NGHE firmware.json LOAD XONG ĐỂ UPDATE CONFIG ======
-  window.addEventListener('firmware-loaded', (e) => {
-    const all = e.detail || [];
-    if(!Array.isArray(all) || !all.length) return;
+  let vipSerialPort = null;
+  let vipSerialReader = null;
+  let vipSerialReading = false;
+  let vipSerialBuffer = '';
+  let vipDetectedMacs = [];
 
+  function addVipConsoleLine(message, cls){
+    if(!vipMacConsole) return;
+    const line = document.createElement('div');
+    if(cls) line.className = cls;
+    const ts = document.createElement('span');
+    ts.className = 'ts';
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    ts.textContent = `[${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}] `;
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = '[ESP] ';
+    line.appendChild(ts);
+    line.appendChild(tag);
+    line.appendChild(document.createTextNode(String(message).replace(/^>\s*/, '')));
+    vipMacConsole.appendChild(line);
+    vipMacConsole.scrollTop = vipMacConsole.scrollHeight;
+  }
+
+  function normalizeMacValue(mac){
+    const cleaned = String(mac || '').replace(/^0x/i, '').replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+    if(cleaned.length === 12) return '0x' + cleaned;
+    if(cleaned.length === 6) return '0x' + cleaned;
+    return '0x' + cleaned;
+  }
+
+  function extractVipMacCandidates(line){
+    const results = [];
+    const matchMac = line.match(/MAC\s*[:=]\s*(?:0x)?([0-9A-Fa-f]{6,16})/i);
+    if(matchMac){
+      results.push(normalizeMacValue(matchMac[1]));
+    }
+
+    const generalMatches = [...line.matchAll(/(?:0x)?([0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}|[0-9A-Fa-f]{12}|[0-9A-Fa-f]{6,16})/g)];
+    for(const m of generalMatches){
+      const value = normalizeMacValue(m[1]);
+      if(value && !results.includes(value) && /MAC|chip|esp|id|wifi/i.test(line.toLowerCase())){
+        results.push(value);
+      }
+    }
+
+    return results;
+  }
+
+  function addDetectedMac(macStr){
+    const value = normalizeMacValue(macStr);
+    if(!value || vipDetectedMacs.includes(value)) return;
+    vipDetectedMacs.push(value);
+    addVipConsoleLine(`> MAC: ${value}`, 'ln-ok');
+    if(typeof toast === 'function') toast('✓ Đã đọc MAC: ' + value);
+  }
+
+  async function writeVipSerial(text){
+    if(!vipSerialPort || !vipSerialPort.writable) return;
+    const writer = vipSerialPort.writable.getWriter();
+    try{
+      await writer.write(new TextEncoder().encode(text));
+    }finally{
+      writer.releaseLock();
+    }
+  }
+
+  async function readVipSerialLoop(){
+    if(!vipSerialPort || !vipSerialPort.readable || vipSerialReading) return;
+    vipSerialReading = true;
+    const decoder = new TextDecoder();
+    vipSerialReader = vipSerialPort.readable.getReader();
+    try{
+      while(vipSerialReading){
+        const { value, done } = await vipSerialReader.read();
+        if(done) break;
+        if(value){
+          vipSerialBuffer += decoder.decode(value, { stream: true });
+          const lines = vipSerialBuffer.split('\n');
+          vipSerialBuffer = lines.pop() || '';
+          lines.forEach(line => {
+            const clean = line.replace(/\r$/, '').trim();
+            if(!clean) return;
+            addVipConsoleLine(clean);
+            const macs = extractVipMacCandidates(clean);
+            macs.forEach(addDetectedMac);
+          });
+        }
+      }
+    }catch(err){
+      addVipConsoleLine('[LỖI SERIAL] ' + (err?.message || err), 'ln-err');
+    }finally{
+      try{ vipSerialReader.releaseLock(); }catch(e){}
+      vipSerialReader = null;
+      vipSerialReading = false;
+    }
+  }
+
+  async function disconnectVipSerial(){
+    vipSerialReading = false;
+    try{ if(vipSerialReader) await vipSerialReader.cancel(); }catch(e){}
+    try{ if(vipSerialPort) await vipSerialPort.close(); }catch(e){}
+    vipSerialReader = null;
+    vipSerialPort = null;
+    vipSerialBuffer = '';
+  }
+
+  async function connectVipSerialAndReadMac(){
+    try{
+      vipMacConsole.innerHTML = '';
+      addVipConsoleLine('> đang kết nối thiết bị...');
+      const port = await navigator.serial.requestPort();
+      vipSerialPort = port;
+      await port.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none' });
+      addVipConsoleLine('> đã mở cổng Serial 115200 8N1', 'ln-ok');
+      await readVipSerialLoop();
+      await new Promise(r => setTimeout(r, 400));
+      await writeVipSerial('reboot\r\n');
+      addVipConsoleLine('> reboot');
+      await new Promise(r => setTimeout(r, 1200));
+      await writeVipSerial('mac\r\n');
+      addVipConsoleLine('> mac');
+      addVipConsoleLine('> chờ thiết bị in mã MAC...');
+      if(vipMacCopyBtn) vipMacCopyBtn.disabled = false;
+    }catch(err){
+      addVipConsoleLine('> không thể kết nối thiết bị: ' + (err?.message || err), 'ln-err');
+      await disconnectVipSerial();
+    }
+  }
+
+  serialMacBtn?.addEventListener('click', connectVipSerialAndReadMac);
+
+  vipMacCopyBtn?.addEventListener('click', async () => {
+    const text = vipDetectedMacs.length ? vipDetectedMacs.join('\n') : '';
+    if(!text) {
+      if(typeof toast === 'function') toast('Chưa có MAC nào được đọc');
+      return;
+    }
+    try{
+      await navigator.clipboard.writeText(text);
+      vipMacCopyBtn.textContent = '✓ Đã copy';
+      if(typeof toast === 'function') toast('✓ Đã sao chép mã MAC');
+      setTimeout(() => { vipMacCopyBtn.textContent = '📋'; }, 1800);
+    }catch(e){
+      if(typeof toast === 'function') toast('Không copy được — trình duyệt chặn clipboard');
+    }
+  });
     const tvbItem = all.find(it => 
       typeof it.name === 'string' && /tv\s*[-_.]?\s*b[\s-]?gone/i.test(it.name)
     );
